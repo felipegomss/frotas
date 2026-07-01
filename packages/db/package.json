@@ -1,0 +1,11 @@
+{
+  "name": "@frotas/db", "version": "0.0.0", "private": true, "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "generate": "prisma generate",
+    "migrate:admin": "prisma migrate dev",
+    "template:build": "prisma migrate diff --from-empty --to-schema-datamodel prisma/tenant.prisma --script > prisma/tenant-template.sql"
+  },
+  "dependencies": { "@prisma/client": "latest" },
+  "devDependencies": { "prisma": "latest", "typescript": "latest" }
+}
