@@ -1,57 +1,71 @@
 // Control plane (admin). Fixed, managed by Prisma.
 // Tenant schemas are created outside Prisma (runner + tenant-template.sql).
-generator client { provider = "prisma-client-js" }
-datasource db { provider = "postgresql"; url = env("DATABASE_URL") }
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
 
 model Identity {
-  id String @id @default(uuid())
-  cpf String @unique
-  email String @unique
-  name String
-  authSub String? @map("auth_sub")
-  status String @default("active")
-  createdAt DateTime @default(now()) @map("created_at")
+  id          String       @id @default(uuid())
+  cpf         String       @unique
+  email       String       @unique
+  name        String
+  authSub     String?      @map("auth_sub")
+  status      String       @default("active")
+  createdAt   DateTime     @default(now()) @map("created_at")
   memberships Membership[]
+
   @@map("identities")
 }
+
 model Tenant {
-  id String @id @default(uuid())
-  slug String @unique
-  schemaName String @unique @map("schema_name")
-  name String
-  status String @default("provisioning")
-  createdAt DateTime @default(now()) @map("created_at")
+  id          String       @id @default(uuid())
+  slug        String       @unique
+  schemaName  String       @unique @map("schema_name")
+  name        String
+  status      String       @default("provisioning")
+  createdAt   DateTime     @default(now()) @map("created_at")
   memberships Membership[]
-  invites Invite[]
+  invites     Invite[]
+
   @@map("tenants")
 }
+
 model Membership {
-  id String @id @default(uuid())
-  identityId String @map("identity_id")
-  tenantId String @map("tenant_id")
-  role String
-  status String @default("active")
-  identity Identity @relation(fields: [identityId], references: [id])
-  tenant Tenant @relation(fields: [tenantId], references: [id])
+  id         String   @id @default(uuid())
+  identityId String   @map("identity_id")
+  tenantId   String   @map("tenant_id")
+  role       String
+  status     String   @default("active")
+  identity   Identity @relation(fields: [identityId], references: [id])
+  tenant     Tenant   @relation(fields: [tenantId], references: [id])
+
   @@unique([identityId, tenantId, role])
   @@map("memberships")
 }
+
 model Invite {
-  id String @id @default(uuid())
-  tenantId String @map("tenant_id")
-  email String
-  role String
-  token String @unique
-  expiresAt DateTime @map("expires_at")
-  usedAt DateTime? @map("used_at")
-  tenant Tenant @relation(fields: [tenantId], references: [id])
+  id        String    @id @default(uuid())
+  tenantId  String    @map("tenant_id")
+  email     String
+  role      String
+  token     String    @unique
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  tenant    Tenant    @relation(fields: [tenantId], references: [id])
+
   @@map("invites")
 }
+
 model ProvisioningJob {
-  id String @id @default(uuid())
-  tenantId String @map("tenant_id")
-  status String @default("pending")
-  error String?
+  id        String   @id @default(uuid())
+  tenantId  String   @map("tenant_id")
+  status    String   @default("pending")
+  error     String?
   createdAt DateTime @default(now()) @map("created_at")
+
   @@map("provisioning_jobs")
 }
