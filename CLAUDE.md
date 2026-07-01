@@ -1,28 +1,38 @@
-# frotas
+# frotas (AMPARO Frota)
 
 Plataforma SaaS multi-tenant de gestão de frota pública (DDS Sistemas).
 
-## Padrão de idioma
-- Fronteira em PORTUGUÊS: rotas (/frota, /ordens-de-uso), textos de UI, rótulos de relatório.
-- Interior em INGLÊS: tabelas e colunas do banco, variáveis, funções, classes, tipos.
+## Documentação (consulte sob demanda)
+Base em `specs/` — comece por `specs/README.md`. Fluxo e skills: `specs/fluxo.md`.
+Produto: specs/produto/ · Arquitetura: specs/arquitetura/ · Módulos: specs/EFs/
+Convenções: specs/convencoes/ · Decisões: specs/adr/ · Checklists: specs/checklists/
+Specs de feature: specs/features/ · Roadmap: specs/roadmap.md
 
-## Stack
-- Monorepo: pnpm workspaces + Turborepo
-- Web/Admin-console: Next.js (App Router), Tailwind, shadcn/ui
-- API/Worker: NestJS (hexagonal), Prisma
-- Mobile: Expo (motorista e gestor)
-- Estado: TanStack Query (servidor) + Zustand (cliente/UI).
-- Formulários: React Hook Form + Zod (mesmo schema de @frotas/contracts).
-- Banco: PostgreSQL, multi-tenant por schema. Prisma no controle (admin).
+## Disciplina obrigatória (specs/convencoes/tdd-sdd.md)
+- SDD: nada de código sem spec com critérios de aceite (specs/features/).
+- TDD: teste do critério primeiro; red-green-refactor. PR não passa sem teste.
 
-## Convenções não-negociáveis
-- Domínio (packages/domain) NÃO conhece Prisma. Depende de portas.
-- Tipo do Prisma NUNCA cruza a fronteira do repositório. Use mappers.
-- Tenant vem da claim assinada do token, validada no servidor.
-- Acesso a dado de tenant usa SET LOCAL search_path em transação.
-- Contrato de API em packages/contracts (Zod).
-- HTTP: fetch nativo, sem Axios.
-- Worker fala com a API só via SQS. Nunca HTTP síncrono.
+## Fluxo (specs/fluxo.md)
+Entender -> planejar (spec) -> construir (TDD) -> validar -> revisar (subagent) -> entregar.
+Sempre plan mode. Rode o Claude Code a partir da raiz.
+
+## Skills: planejar · modulo-hexagonal · revisar-tenant · validar · novo-adr
+## Subagent: revisor (revisão sem contexto, aplica specs/checklists/revisao.md)
+## Plugins oficiais: security-guidance · code-review · frontend-design · skill-creator
+
+## Regras não-negociáveis
+- Idioma: rotas/UI em português; banco, código, tipos em inglês.
+- Domínio (packages/domain) NÃO conhece Prisma. Depende de portas. Use mappers.
+- Tipo do Prisma NUNCA cruza a fronteira do repositório.
+- Tenant vem da claim assinada do token, validada no servidor. Nunca do cliente.
+- Dado de tenant: $queryRaw + SET LOCAL search_path em transação (nunca de sessão).
+- Prisma 7 exige driver adapter (@prisma/adapter-pg); url em prisma.config.ts.
+- HTTP: fetch nativo, sem Axios. Worker fala com a API só via SQS.
+- Contrato de API em packages/contracts (Zod), importado por web e mobile.
+
+## Stack (detalhe em specs/arquitetura/stack.md)
+Monorepo pnpm+Turborepo. Next.js (web/admin-console), NestJS hexagonal (api/worker),
+Expo (mobile). PostgreSQL + Prisma 7. TanStack Query + Zustand. AWS sa-east-1.
 
 ## Comandos
 - docker compose up -d
