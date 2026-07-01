@@ -5,6 +5,11 @@ import { PrismaClient } from "./generated/client/client.js";
 // enums and model types are all re-exported from the generated barrel.
 export * from "./generated/client/client.js";
 export { provisionTenant } from "./tenant-runner.js";
+export {
+  seedDemoData,
+  type SeedDemoOptions,
+  type SeededDemo,
+} from "./seed-demo.js";
 
 /**
  * Builds a control-plane PrismaClient wired to the Postgres driver adapter.

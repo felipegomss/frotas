@@ -1,5 +1,5 @@
 import { createPrismaClient } from "./index.js";
-import { provisionTenant } from "./tenant-runner.js";
+import { seedDemoData } from "./seed-demo.js";
 
 // Prisma 7 does not auto-load .env.
 try {
@@ -8,24 +8,23 @@ try {
   // env already provided by the shell — ignore.
 }
 
+// Dev IdP subject: matches the `sub` of the token issued by the local fake OIDC
+// issuer. In prod this is the Cognito `sub` stored on Identity.authSub.
+const DEV_SUB = "dev-sub-gestor";
+
 async function main(): Promise<void> {
   const prisma = createPrismaClient();
   try {
-    // Idempotent: rebuild the demo tenant from scratch so re-running is safe.
-    await prisma.$executeRawUnsafe(`DROP SCHEMA IF EXISTS "tenant_demo" CASCADE`);
-
-    const schema = await provisionTenant(prisma, "demo");
-
-    await prisma.$transaction(async (tx) => {
-      await tx.$executeRawUnsafe(`SET LOCAL search_path TO "${schema}"`);
-      await tx.$executeRawUnsafe(
-        `INSERT INTO vehicles (plate, model, status, current_mileage) VALUES
-           ('ABC1D23', 'Fiat Strada', 'available', 15000),
-           ('EFG4H56', 'VW Saveiro', 'available', 42000)`,
-      );
+    await seedDemoData(prisma, {
+      authSub: DEV_SUB,
+      cpf: "11111111111",
+      email: "gestor@demo.gov.br",
+      name: "Gestor Demo",
     });
-
-    console.log(`Seed ok: tenant "${schema}" provisioned with 2 vehicles.`);
+    console.log(
+      'Seed ok: identity "gestor@demo.gov.br" (member of demo), ' +
+        "tenants demo + demo2 provisioned with vehicles.",
+    );
   } finally {
     await prisma.$disconnect();
   }

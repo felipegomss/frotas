@@ -1,6 +1,16 @@
 {
   "name": "@frotas/contracts", "version": "0.0.0", "private": true, "type": "module",
-  "main": "./src/index.ts", "types": "./src/index.ts",
-  "scripts": { "typecheck": "tsc --noEmit", "lint": "eslint src" },
+  "main": "./dist/index.js", "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src"
+  },
   "dependencies": { "zod": "latest" }, "devDependencies": { "@frotas/config": "workspace:*", "typescript": "latest" }
 }

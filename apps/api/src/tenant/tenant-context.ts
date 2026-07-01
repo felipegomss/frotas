@@ -1,49 +1,36 @@
 import {
   BadRequestException,
-  ForbiddenException,
   Inject,
   Injectable,
   Scope,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
-import type { Request } from 'express';
+import type { AuthedRequest } from '../auth/session-principal';
 
 // A tenant schema is created as `tenant_<slug>` by the tenant-runner.
 const TENANT_SCHEMA_PATTERN = /^tenant_[a-z0-9_]+$/;
 
 /**
- * Per-request tenant boundary. Phase 1: the schema comes from the
- * `X-Tenant-Schema` header. Phase 2 will resolve it from the signed token —
- * only this class changes, adapters keep using `schema`.
- *
- * SECURITY: a client header is spoofable, so header-based tenant resolution is
- * a broken-isolation vector on its own. It is disabled unless the deployment
- * explicitly opts in with `ALLOW_HEADER_TENANT=1` (dev-only scaffolding). In
- * any environment without that flag, tenant routes cannot serve tenant data.
- * Phase 2 replaces this with a tenant derived from the authenticated principal.
+ * Per-request tenant boundary. The schema comes ONLY from the verified session
+ * principal (ADR 0010) that `SessionGuard` puts on the request — never from a
+ * client header. This closes the header-spoofing vector that phase 1 carried.
  *
  * The value is validated here because it is interpolated into
  * `SET LOCAL search_path` (an identifier cannot be a bound parameter).
  */
 @Injectable({ scope: Scope.REQUEST })
 export class TenantContext {
-  readonly schema: string;
+  constructor(@Inject(REQUEST) private readonly req: AuthedRequest) {}
 
-  constructor(@Inject(REQUEST) req: Request) {
-    if (process.env.ALLOW_HEADER_TENANT !== '1') {
-      throw new ForbiddenException(
-        'Resolução de tenant por header desabilitada (fase 1). ' +
-          'Defina ALLOW_HEADER_TENANT=1 apenas em desenvolvimento.',
-      );
+  get schema(): string {
+    const principal = this.req.principal;
+    if (!principal) {
+      throw new UnauthorizedException('Sessão de tenant ausente.');
     }
-
-    const header = req.headers['x-tenant-schema'];
-    const value = Array.isArray(header) ? header[0] : header;
-    if (!value || !TENANT_SCHEMA_PATTERN.test(value)) {
-      throw new BadRequestException(
-        'Cabeçalho X-Tenant-Schema ausente ou inválido.',
-      );
+    if (!TENANT_SCHEMA_PATTERN.test(principal.schemaName)) {
+      throw new BadRequestException('Schema de tenant inválido.');
     }
-    this.schema = value;
+    return principal.schemaName;
   }
 }
