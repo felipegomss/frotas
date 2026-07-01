@@ -19,7 +19,15 @@ Sempre plan mode primeiro (Shift+Tab); rode o Claude Code a partir da raiz.
 
 Decisão de arquitetura nova -> skill `novo-adr` (checklist specs/checklists/decisao.md).
 
-## Skills (.claude/skills/): quebrar-milestone · planejar · modulo-hexagonal · revisar-tenant · validar · novo-adr
+## Skills (.claude/skills/): quebrar-milestone · criar-release · rollback · planejar · modulo-hexagonal · revisar-tenant · validar · novo-adr
 ## Subagent (.claude/agents/): revisor
-## Checklists (specs/checklists/): planejamento · decisao · revisao
+## Checklists (specs/checklists/): planejamento · decisao · revisao · release · rollback
 ## Plugins oficiais: /plugin install <nome>@claude-plugins-official  (security-guidance, code-review, frontend-design, skill-creator)
+
+## Release (quando um conjunto de features está pronto para produção)
+Skill `criar-release`: aplica specs/convencoes/versionamento.md (SemVer) e o checklist
+specs/checklists/release.md antes de tagear. Dispara o Portão 2 (release-checks.yml).
+
+## Rollback (quando algo quebra em homolog/produção)
+Skill `rollback`: classifica a causa (flag > código > banco) e conduz specs/checklists/rollback.md.
+Banco segue expand/contract (specs/arquitetura/rollback-banco.md) — raramente precisa reverter de fato.

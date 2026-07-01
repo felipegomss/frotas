@@ -28,6 +28,11 @@ NÃO aprove se houver P0 ou P1. Não edite código.
 - [ ] Autorização por role checada nos endpoints sensíveis.
 - [ ] Sem segredo hardcoded; sem PII em log; upload com escopo de tenant na key/URL assinada.
 
+## Rollback e flags
+- [ ] Migration que muda shape de dado existente segue expand/contract (specs/arquitetura/rollback-banco.md);
+      não combina "adicionar" e "remover" relacionados na mesma migration.
+- [ ] Feature flag nova nasce OFF por padrão e tem responsável/razão documentada no PR.
+
 ## Convenções
 - [ ] Idioma: rotas/UI em PT; código, banco, tipos em EN.
 - [ ] HTTP: fetch nativo (sem Axios). Worker só via SQS (sem HTTP síncrono).
