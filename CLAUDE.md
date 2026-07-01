@@ -16,7 +16,7 @@ Specs de feature: specs/features/ · Roadmap: specs/roadmap.md
 Entender -> planejar (spec) -> construir (TDD) -> validar -> revisar (subagent) -> entregar.
 Sempre plan mode. Rode o Claude Code a partir da raiz.
 
-## Skills: planejar · modulo-hexagonal · revisar-tenant · validar · novo-adr
+## Skills: quebrar-milestone · planejar · modulo-hexagonal · revisar-tenant · validar · novo-adr
 ## Subagent: revisor (revisão sem contexto, aplica specs/checklists/revisao.md)
 ## Plugins oficiais: security-guidance · code-review · frontend-design · skill-creator
 

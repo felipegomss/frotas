@@ -2,6 +2,11 @@
 
 Sempre plan mode primeiro (Shift+Tab); rode o Claude Code a partir da raiz.
 
+## Camada de milestone
+0. QUEBRAR — skill `quebrar-milestone`: lê specs/produto/milestones.md e decompõe o milestone
+   em backlog de features (fatias verticais) ordenado por dependência. Guideline: specs/convencoes/features.md.
+
+## Por feature (repete para cada item do backlog)
 1. ENTENDER  — leia a EF do módulo (specs/EFs/) e ADRs/convenções.
 2. PLANEJAR  — skill `planejar` (SDD): cria spec em specs/features/ com critérios de aceite;
                define os testes primeiro. Checklist: specs/checklists/planejamento.md.
@@ -14,9 +19,7 @@ Sempre plan mode primeiro (Shift+Tab); rode o Claude Code a partir da raiz.
 
 Decisão de arquitetura nova -> skill `novo-adr` (checklist specs/checklists/decisao.md).
 
-## Skills (.claude/skills/): planejar · modulo-hexagonal · revisar-tenant · validar · novo-adr
+## Skills (.claude/skills/): quebrar-milestone · planejar · modulo-hexagonal · revisar-tenant · validar · novo-adr
 ## Subagent (.claude/agents/): revisor
 ## Checklists (specs/checklists/): planejamento · decisao · revisao
-
-## Plugins oficiais (dentro do Claude Code): /plugin install <nome>@claude-plugins-official
-security-guidance · code-review · frontend-design · skill-creator  (depois: /reload-plugins)
+## Plugins oficiais: /plugin install <nome>@claude-plugins-official  (security-guidance, code-review, frontend-design, skill-creator)
