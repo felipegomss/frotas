@@ -1,7 +1,17 @@
 // Control plane (admin). Fixed, managed by Prisma.
 // Tenant schemas are created outside Prisma (runner + tenant-template.sql).
-generator client { provider = "prisma-client-js" }
-datasource db { provider = "postgresql"; url = env("DATABASE_URL") }
+// Prisma 7 is Rust-free: the client needs a driver adapter (PrismaPg) at runtime.
+// The datasource url does NOT live here — it is provided by prisma.config.ts.
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/client"
+  runtime             = "nodejs"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+datasource db {
+  provider = "postgresql"
+}
 
 model Identity {
   id String @id @default(uuid())

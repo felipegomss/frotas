@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "./generated/client/client.js";
 export async function provisionTenant(prisma: PrismaClient, slug: string) {
   const schema = `tenant_${slug}`;
   const sql = readFileSync(new URL("../prisma/tenant-template.sql", import.meta.url), "utf8");

@@ -1,6 +1,10 @@
 export type VehicleStatus =
-  | "available" | "in_use" | "reserved"
-  | "in_maintenance" | "in_repair" | "inactive";
+  | "available"
+  | "in_use"
+  | "reserved"
+  | "in_maintenance"
+  | "in_repair"
+  | "inactive";
 
 export class Vehicle {
   constructor(
@@ -10,7 +14,8 @@ export class Vehicle {
     public currentMileage: number,
   ) {}
   registerMileage(mileage: number): void {
-    if (mileage < this.currentMileage) throw new Error("Mileage cannot decrease");
+    if (mileage < this.currentMileage)
+      throw new Error("Mileage cannot decrease");
     this.currentMileage = mileage;
   }
 }
