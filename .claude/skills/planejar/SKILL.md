@@ -1,11 +1,12 @@
 ---
 name: planejar
-description: Planeja uma feature ou módulo ANTES de codar. Use ao iniciar algo novo. Lê a EF do módulo, os ADRs e as convenções, e propõe um plano em plan mode sem tocar em código.
+description: Planeja uma feature ANTES de codar (SDD). Use ao iniciar algo novo. Cria a spec com critérios de aceite, define os testes primeiro (TDD) e propõe um plano em plan mode sem tocar em código.
 ---
-1. Identifique o módulo/feature e leia a EF em specs/EFs/.
-2. Leia os ADRs e convenções relevantes (specs/adr/, specs/convencoes/) e o specs/roadmap.md.
-3. Proponha um plano por camada: domain (entidade, porta, caso de uso) -> contracts (Zod)
-   -> api (adaptador, mapper, controller, module) -> app (web/mobile). Inclua os testes.
-4. Liste riscos, decisões em aberto e o que fica fora de escopo.
-5. NÃO edite código. Apresente o plano e peça aprovação (plan mode).
-Decisão de arquitetura nova -> use a skill novo-adr.
+Siga specs/checklists/planejamento.md. Passos:
+1. Leia a EF do módulo (specs/EFs/), ADRs e convenções.
+2. Crie/atualize specs/features/<nome>.md a partir de specs/features/_template.md,
+   com critérios de aceite verificáveis (given/when/then).
+3. Para cada critério, defina o teste que o prova (TDD: o teste vem antes do código).
+4. Monte o plano por camada: domain -> contracts -> api -> app.
+5. Liste riscos, fora de escopo e decisões (ADR via skill novo-adr se preciso).
+6. NÃO edite código. Apresente o plano e peça aprovação (plan mode).
