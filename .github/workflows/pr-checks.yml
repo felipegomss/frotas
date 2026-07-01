@@ -14,12 +14,17 @@ jobs:
     runs-on: ubuntu-latest
     # `prisma generate` (via @frotas/db build) lê DATABASE_URL de prisma.config.ts.
     # Nada conecta aqui (generate/typecheck/build/unit); é só para o config parsear.
+    # TURBO_SCM_BASE diz ao `--affected` contra o que comparar (base do PR).
     env:
       DATABASE_URL: postgresql://frotas:frotas@localhost:5432/frotas?schema=admin
+      TURBO_SCM_BASE: origin/main
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Buscar branch base (para o turbo --affected)
+        run: git fetch --no-tags origin main
 
       - uses: pnpm/action-setup@v4
 
@@ -73,8 +78,11 @@ jobs:
       - name: Validar schema
         run: pnpm --filter @frotas/db exec prisma validate
 
-      - name: Detectar drift entre schema e migrations
-        run: pnpm --filter @frotas/db exec prisma migrate diff --from-migrations ./prisma/migrations --to-schema-datamodel ./prisma/schema.prisma --exit-code
+      - name: Aplicar migrations no Postgres do CI
+        run: pnpm --filter @frotas/db exec prisma migrate deploy
+
+      - name: Detectar drift (banco migrado vs schema)
+        run: pnpm --filter @frotas/db exec prisma migrate diff --from-config-datasource --to-schema ./prisma/schema.prisma --exit-code
 
   secrets-scan:
     name: Segredo vazado no diff
