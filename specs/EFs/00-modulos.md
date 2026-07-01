@@ -1,15 +1,18 @@
-# Mapa dos módulos
+# Mapa dos módulos (EFs)
 
-| Módulo                        | EF  | Milestone |
-|-------------------------------|-----|-----------|
-| Cadastro da frota             | 01  | M0/M1     |
-| Ordem de uso                  | 02  | M0        |
-| Abastecimento                 | 03  | M0/M3     |
-| Manutenção e consertos        | 04  | M2        |
-| Motoristas                    | 05  | M0/M1     |
-| Ocorrências e documentos      | 06  | M1/M2     |
-| Alertas, painéis e relatórios | 07  | M3/M4     |
-| App do motorista              | 08  | M0        |
-| App do gestor                 | 09  | M5        |
+Índice das especificações funcionais: o QUE cada módulo faz. O agendamento (qual módulo em qual
+milestone) é conteúdo editável e vive em specs/produto/milestones.md, NÃO aqui.
 
-Padrão de idioma: rotas/UI em português; tabelas, campos e código em inglês (convencoes/idioma.md).
+| EF | Módulo                         | Descreve |
+|----|--------------------------------|----------|
+| 01 | Cadastro da frota              | veículos, responsável, secretarias, status |
+| 02 | Ordem de uso                   | solicitação, aprovação, saída/retorno, agenda |
+| 03 | Abastecimento                  | registro com foto, análise de consumo |
+| 04 | Manutenção e consertos         | preventiva, oficina, orçamento, peças |
+| 05 | Motoristas                     | cadastro, CNH, autorizações, histórico |
+| 06 | Ocorrências e documentos       | acidentes, multas, gestão documental |
+| 07 | Alertas, painéis e relatórios  | alertas, KPIs, relatórios PDF/Excel |
+| 08 | App do motorista               | check-in/out, abastecimento, ocorrência |
+| 09 | App do gestor                  | solicitar, aprovar, reservar, autorizar |
+
+Idioma: rotas/UI em português; tabelas, campos e código em inglês (convencoes/idioma.md).
