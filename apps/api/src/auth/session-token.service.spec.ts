@@ -58,3 +58,45 @@ describe('SessionTokenService', () => {
     await expect(service.verify(token)).rejects.toThrow();
   });
 });
+
+describe('SessionTokenService — secret strength (M3)', () => {
+  const originalEnv = process.env.NODE_ENV;
+  const originalSecret = process.env.SESSION_TOKEN_SECRET;
+
+  const restore = (key: string, value: string | undefined): void => {
+    if (value === undefined) {
+      delete process.env[key];
+    } else {
+      process.env[key] = value;
+    }
+  };
+
+  afterEach(() => {
+    restore('NODE_ENV', originalEnv);
+    restore('SESSION_TOKEN_SECRET', originalSecret);
+  });
+
+  it('(a) throws in production with the placeholder secret', () => {
+    process.env.NODE_ENV = 'production';
+    process.env.SESSION_TOKEN_SECRET = 'dev-only-change-me';
+    expect(() => new SessionTokenService()).toThrow();
+  });
+
+  it('(a) throws in production with a too-short secret', () => {
+    process.env.NODE_ENV = 'production';
+    process.env.SESSION_TOKEN_SECRET = 'short';
+    expect(() => new SessionTokenService()).toThrow();
+  });
+
+  it('(b) constructs in production with a strong secret', () => {
+    process.env.NODE_ENV = 'production';
+    process.env.SESSION_TOKEN_SECRET = 'x'.repeat(40);
+    expect(() => new SessionTokenService()).not.toThrow();
+  });
+
+  it('(c) allows the placeholder outside production (dev)', () => {
+    process.env.NODE_ENV = 'development';
+    process.env.SESSION_TOKEN_SECRET = 'dev-only-change-me';
+    expect(() => new SessionTokenService()).not.toThrow();
+  });
+});

@@ -7,6 +7,10 @@ import type { SessionPrincipal } from './session-principal';
 const SESSION_ISSUER = 'frotas-api';
 const SESSION_AUDIENCE = 'frotas-tenant-session';
 
+// Known placeholder(s) that must never sign real tokens in production.
+const PLACEHOLDER_SECRETS = new Set(['dev-only-change-me']);
+const MIN_SECRET_LENGTH = 32;
+
 /**
  * Mints and verifies the API-signed session token (ADR 0010). The token carries
  * the active tenant claim (`sch`) derived from the memberships — never from the
@@ -21,6 +25,19 @@ export class SessionTokenService {
     const secret = process.env.SESSION_TOKEN_SECRET;
     if (!secret) {
       throw new Error('SESSION_TOKEN_SECRET is not set');
+    }
+    // Fail-closed in production: a placeholder or short secret would let tokens
+    // be forged with a publicly-known key.
+    if (process.env.NODE_ENV === 'production') {
+      if (
+        PLACEHOLDER_SECRETS.has(secret) ||
+        secret.length < MIN_SECRET_LENGTH
+      ) {
+        throw new Error(
+          'SESSION_TOKEN_SECRET is too weak for production ' +
+            `(placeholder or shorter than ${MIN_SECRET_LENGTH} chars).`,
+        );
+      }
     }
     this.secret = new TextEncoder().encode(secret);
     this.ttl = process.env.SESSION_TOKEN_TTL ?? '1h';
