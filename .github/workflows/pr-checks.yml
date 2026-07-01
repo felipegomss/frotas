@@ -1,0 +1,137 @@
+name: PR Checks (Portão 1)
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: pr-checks-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  affected:
+    name: Lint · Typecheck · Test · Build (afetados)
+    runs-on: ubuntu-latest
+    # `prisma generate` (via @frotas/db build) lê DATABASE_URL de prisma.config.ts.
+    # Nada conecta aqui (generate/typecheck/build/unit); é só para o config parsear.
+    env:
+      DATABASE_URL: postgresql://frotas:frotas@localhost:5432/frotas?schema=admin
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Instalar dependências
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint + Typecheck + Test + Build (por afetação)
+        run: pnpm turbo run lint typecheck test build --affected
+
+  prisma:
+    name: Prisma validate + diff
+    runs-on: ubuntu-latest
+    # `migrate diff --from-migrations` replays as migrações num shadow DB, então
+    # precisa de um Postgres real. `prisma.config.ts` também exige DATABASE_URL.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: frotas
+          POSTGRES_PASSWORD: frotas
+          POSTGRES_DB: frotas_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://frotas:frotas@localhost:5432/frotas_ci?schema=admin
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Instalar dependências
+        run: pnpm install --frozen-lockfile
+
+      - name: Validar schema
+        run: pnpm --filter @frotas/db exec prisma validate
+
+      - name: Detectar drift entre schema e migrations
+        run: pnpm --filter @frotas/db exec prisma migrate diff --from-migrations ./prisma/migrations --to-schema-datamodel ./prisma/schema.prisma --exit-code
+
+  secrets-scan:
+    name: Segredo vazado no diff
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  commit-lint:
+    name: Commits convencionais
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Instalar commitlint
+        run: npm install -g @commitlint/cli @commitlint/config-conventional
+      - name: Validar mensagens do PR
+        # SHAs via env (não interpolar input no run — evita injeção em workflow).
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          echo "module.exports = { extends: ['@commitlint/config-conventional'] };" > commitlint.config.js
+          npx commitlint --from "$BASE_SHA" --to "$HEAD_SHA" --verbose
+
+  tenant-guardrails:
+    name: Guardrails multi-tenant (rede de segurança, não substitui o revisor)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bloquear $queryRawUnsafe com schema interpolado
+        run: |
+          if grep -rnE '\$queryRawUnsafe\(.*(schema|tenant).*\$\{' apps/ packages/ 2>/dev/null; then
+            echo "::error::Encontrado \$queryRawUnsafe com schema/tenant interpolado por template string. Use slug validado + parametrização (ver ADR 0005 e specs/arquitetura/seguranca.md)."
+            exit 1
+          fi
+      - name: Bloquear SET search_path fora de SET LOCAL
+        run: |
+          if grep -rnE "SET\s+search_path" apps/ packages/ 2>/dev/null | grep -viE "SET LOCAL"; then
+            echo "::error::Encontrado SET search_path sem ser SET LOCAL. Com pool de conexão isso vaza entre tenants (specs/arquitetura/seguranca.md)."
+            exit 1
+          fi
+      - name: Bloquear tenant/schema vindo de input do cliente
+        run: |
+          if grep -rnE "(body|query|headers)\.(tenant|schema)" apps/api/src 2>/dev/null; then
+            echo "::warning::Encontrada referência a tenant/schema vindo de body/query/headers. Confirme que não é usado para resolver o tenant (deve vir só da claim assinada do token)."
+          fi

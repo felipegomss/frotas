@@ -1,0 +1,130 @@
+name: Release Checks (Portão 2 - produção)
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  e2e-tenant:
+    name: E2E multi-tenant (Postgres real)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: frotas
+          POSTGRES_PASSWORD: frotas
+          POSTGRES_DB: frotas_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://frotas:frotas@localhost:5432/frotas_ci
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Instalar dependências
+        run: pnpm install --frozen-lockfile
+
+      - name: Rodar migrations (control-plane)
+        run: pnpm --filter @frotas/db exec prisma migrate deploy
+
+      - name: Provisionar tenant de teste (template SQL via tenant-runner)
+        run: pnpm --filter @frotas/db run provision:test-tenant
+
+      - name: Teste e2e (isolamento por schema)
+        run: pnpm turbo run test:e2e
+
+  build-completo:
+    name: Build completo (todos os apps, sem afetação parcial)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Instalar dependências
+        run: pnpm install --frozen-lockfile
+
+      - name: Build de tudo
+        run: pnpm turbo run build
+
+  dependency-audit:
+    name: Auditoria de dependências
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: pnpm audit (alto/crítico bloqueia)
+        run: pnpm audit --audit-level=high
+
+  terraform-plan:
+    name: Terraform plan (se infra/ mudou)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Checar se infra/ mudou desde a última tag
+        id: diff
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -z "$PREV_TAG" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            if git diff --name-only "$PREV_TAG" HEAD | grep -q '^infra/'; then
+              echo "changed=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "changed=false" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+      - uses: hashicorp/setup-terraform@v3
+        if: steps.diff.outputs.changed == 'true'
+
+      - name: terraform plan (homolog)
+        if: steps.diff.outputs.changed == 'true'
+        working-directory: infra/envs/homolog
+        run: |
+          terraform init
+          terraform plan -no-color
+
+  gate-final:
+    name: Gate final (aguarda aprovação humana)
+    needs: [e2e-tenant, build-completo, dependency-audit, terraform-plan]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Todos os checks passaram, ambiente 'production' exige aprovação manual
+        run: echo "Gate liberado. Siga specs/checklists/revisao.md antes de aprovar o deploy no Environment 'production'."
