@@ -1,0 +1,2 @@
+# tsc build output (run `pnpm --filter @frotas/domain build`)
+/dist/

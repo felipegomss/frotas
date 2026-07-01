@@ -1,0 +1,6 @@
+# Prisma generated client (run `pnpm --filter @frotas/db generate`)
+/src/generated/
+# tsc build output (run `pnpm --filter @frotas/db build`)
+/dist/
+# local env (control-plane connection string)
+.env
