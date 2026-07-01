@@ -1,0 +1,68 @@
+### M0-F01 — validação manual (VS Code REST Client / compatíveis)
+#
+# Pré-requisitos (3 terminais), a partir da raiz do repo:
+#   export PATH="$HOME/.nvm/versions/node/v20.20.2/bin:$PATH"
+#   1) docker compose up -d
+#   2) pnpm --filter @frotas/db build && pnpm --filter @frotas/db seed
+#   3) pnpm --filter api dev:idp        # emissor OIDC falso na :9999
+#   4) pnpm --filter api start          # API na :3000 (lê apps/api/.env)
+#
+# Depois clique em "Send Request" acima de cada bloco, de cima pra baixo
+# (as requisições encadeiam token/tenant pelas respostas anteriores).
+
+@base = http://localhost:3000
+@idp = http://localhost:9999
+
+### 0) Token do IdP (emissor falso) para o gestor do seed
+# @name idp
+GET {{idp}}/token?sub=dev-sub-gestor
+
+### AC7 — prefeituras do gestor (deve listar só "demo")
+# @name prefeituras
+GET {{base}}/sessao/prefeituras
+Authorization: Bearer {{idp.response.body.token}}
+
+### AC1 — abre sessão na prefeitura demo (emite o token de sessão)
+# @name sessao
+POST {{base}}/sessao
+Authorization: Bearer {{idp.response.body.token}}
+Content-Type: application/json
+
+{ "tenantId": "{{prefeituras.response.body.0.id}}" }
+
+### AC4 — frota isolada (deve conter ABC1D23/EFG4H56 e NÃO ZZZ9Z99 do demo2)
+GET {{base}}/frota
+Authorization: Bearer {{sessao.response.body.token}}
+
+### AC5 — header X-Tenant-Schema forjado é ignorado (continua a frota de demo)
+GET {{base}}/frota
+Authorization: Bearer {{sessao.response.body.token}}
+X-Tenant-Schema: tenant_demo2
+
+### AC6 — sem token de sessão → 401
+GET {{base}}/frota
+
+### AC6 — token de sessão inválido → 401
+GET {{base}}/frota
+Authorization: Bearer nao.e.um.token.valido
+
+### AC3 — sessão numa prefeitura sem vínculo (uuid qualquer) → 403
+POST {{base}}/sessao
+Authorization: Bearer {{idp.response.body.token}}
+Content-Type: application/json
+
+{ "tenantId": "00000000-0000-0000-0000-000000000000" }
+
+### AC2 — token do IdP com audience errada → 401
+# @name idpAudErrada
+GET {{idp}}/token?sub=dev-sub-gestor&aud=errado
+###
+GET {{base}}/sessao/prefeituras
+Authorization: Bearer {{idpAudErrada.response.body.token}}
+
+### AC2 — token do IdP com issuer errado → 401
+# @name idpIssErrado
+GET {{idp}}/token?sub=dev-sub-gestor&iss=https://evil-issuer.local
+###
+GET {{base}}/sessao/prefeituras
+Authorization: Bearer {{idpIssErrado.response.body.token}}
