@@ -1,6 +1,10 @@
 {
-  "name": "@frotas/domain", "version": "0.0.0", "private": true, "type": "module",
-  "main": "./dist/index.js", "types": "./src/index.ts",
+  "name": "@frotas/domain",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./src/index.ts",
   "exports": {
     ".": {
       "types": "./src/index.ts",
@@ -13,5 +17,10 @@
     "test": "vitest run",
     "lint": "eslint src"
   },
-  "devDependencies": { "@frotas/config": "workspace:*", "typescript": "latest", "vitest": "latest" }
+  "devDependencies": {
+    "@frotas/config": "workspace:*",
+    "@types/node": "^24",
+    "typescript": "latest",
+    "vitest": "latest"
+  }
 }

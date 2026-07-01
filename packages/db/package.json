@@ -15,6 +15,6 @@
     "migrate:admin": "prisma migrate dev",
     "template:build": "prisma migrate diff --from-empty --to-schema-datamodel prisma/tenant.prisma --script > prisma/tenant-template.sql"
   },
-  "dependencies": { "@prisma/client": "latest", "@prisma/adapter-pg": "latest", "pg": "latest" },
+  "dependencies": { "@frotas/domain": "workspace:*", "@prisma/client": "latest", "@prisma/adapter-pg": "latest", "pg": "latest" },
   "devDependencies": { "prisma": "latest", "typescript": "latest", "@types/pg": "latest" }
 }
