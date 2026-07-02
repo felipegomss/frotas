@@ -21,7 +21,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AMPARO Frota",
+  title: "Frota",
   description: "Gestão de frota pública",
 };
 

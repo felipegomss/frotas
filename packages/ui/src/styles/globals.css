@@ -1,9 +1,9 @@
 /*
- * AMPARO Frota — Design tokens (fonte única de verdade).
+ * Frota — Design tokens (fonte única de verdade).
  * Consumido por apps/web e apps/admin-console via `@import "@frotas/ui/globals.css"`.
  * Mobile (Expo/NativeWind) reaproveita as variáveis de :root/.dark.
  *
- * Paleta da marca (logo AMPARO Frota):
+ * Paleta da marca (proposta de logo):
  *   navy  #1B3A63 → oklch(0.347 0.081 256.2)  — primária
  *   green #55A32F → oklch(0.642 0.168 137.3)  — success / dados positivos
  */

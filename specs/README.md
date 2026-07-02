@@ -1,4 +1,4 @@
-# Base de conhecimento — frotas (AMPARO Frota)
+# Base de conhecimento — frotas
 
 Documentação viva do projeto, lida pelo time e pelo Claude Code.
 

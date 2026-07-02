@@ -1,6 +1,6 @@
 # @frotas/ui
 
-Design System do AMPARO Frota. Fonte única de tokens de estilo e componentes
+Design System da plataforma Frota. Fonte única de tokens de estilo e componentes
 compartilhados entre os frontends web (`apps/web`, `apps/admin-console`).
 
 ## O que vive aqui
@@ -11,7 +11,7 @@ compartilhados entre os frontends web (`apps/web`, `apps/admin-console`).
   ícones Remix Icon), adicionados **sob demanda**.
 - `src/lib/utils.ts` — `cn()` (clsx + tailwind-merge).
 
-## Paleta da marca (logo AMPARO Frota)
+## Paleta da marca (proposta de logo)
 
 | Token | Cor | Uso |
 |-------|-----|-----|

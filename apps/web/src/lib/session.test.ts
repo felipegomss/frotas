@@ -78,12 +78,12 @@ describe("session display context (shell do DS)", () => {
   });
 
   it("stores tenant name and role httpOnly and reads them back", async () => {
-    await setSessionContext({ tenantName: "Prefeitura de Amparo", role: "manager" });
+    await setSessionContext({ tenantName: "Prefeitura Demo", role: "manager" });
 
     const entry = store.get(SESSION_CONTEXT_COOKIE);
     expect((entry?.options as { httpOnly?: boolean }).httpOnly).toBe(true);
     expect(await getSessionContext()).toEqual({
-      tenantName: "Prefeitura de Amparo",
+      tenantName: "Prefeitura Demo",
       role: "manager",
     });
   });
@@ -98,7 +98,7 @@ describe("session display context (shell do DS)", () => {
 
   it("clearSession also clears the display context", async () => {
     await setSessionToken("sess-token");
-    await setSessionContext({ tenantName: "Prefeitura de Amparo", role: "manager" });
+    await setSessionContext({ tenantName: "Prefeitura Demo", role: "manager" });
     await clearSession();
     expect(await getSessionContext()).toBeNull();
   });

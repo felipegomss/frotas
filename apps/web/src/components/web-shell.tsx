@@ -23,7 +23,7 @@ export function WebShell({ user, logoutAction, children }: WebShellProps) {
   return (
     <AppShell
       brand={{
-        title: "AMPARO Frota",
+        title: "Frota",
         subtitle: "Gestão de frota pública",
         href: "/veiculos",
         logo: (

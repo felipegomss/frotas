@@ -1,4 +1,4 @@
-# AMPARO Frota — visão geral
+# Frota — visão geral
 
 Plataforma SaaS multi-tenant de gestão de frota pública, da DDS Sistemas.
 Parametrizável para Municípios, Estados e União.

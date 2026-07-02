@@ -1,4 +1,4 @@
-# frotas (AMPARO Frota)
+# frotas
 
 Plataforma SaaS multi-tenant de gestão de frota pública (DDS Sistemas).
 

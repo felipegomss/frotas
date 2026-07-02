@@ -30,7 +30,7 @@ export default async function LoginPage() {
         </span>
         <span className="grid leading-tight">
           <span className="font-heading text-xl font-semibold">
-            AMPARO Frota
+            Frota
           </span>
           <span className="text-xs text-muted-foreground">
             Gestão inteligente da frota pública
@@ -57,7 +57,7 @@ export default async function LoginPage() {
       )}
 
       <p className="text-xs text-muted-foreground">
-        Acesso restrito · AMPARO Frota
+        Acesso restrito · Frota
       </p>
     </main>
   );
