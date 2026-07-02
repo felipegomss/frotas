@@ -5,6 +5,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import {
+  DriverNotFoundError,
   DuplicatePlateError,
   DuplicateSecretariatNameError,
   MembershipNotFoundError,
@@ -20,7 +21,8 @@ type DomainError =
   | DuplicateSecretariatNameError
   | SecretariatInUseError
   | VehicleNotFoundError
-  | DuplicatePlateError;
+  | DuplicatePlateError
+  | DriverNotFoundError;
 
 /**
  * Maps domain errors to HTTP at the edge (roadmap fase 4). No active membership
@@ -34,6 +36,7 @@ type DomainError =
   SecretariatInUseError,
   VehicleNotFoundError,
   DuplicatePlateError,
+  DriverNotFoundError,
 )
 export class DomainExceptionFilter implements ExceptionFilter {
   catch(exception: DomainError, host: ArgumentsHost): void {
@@ -59,10 +62,17 @@ export class DomainExceptionFilter implements ExceptionFilter {
       });
       return;
     }
+    if (exception instanceof DriverNotFoundError) {
+      response.status(HttpStatus.NOT_FOUND).json({
+        statusCode: HttpStatus.NOT_FOUND,
+        message: 'Motorista não encontrado.',
+      });
+      return;
+    }
     if (exception instanceof SecretariatInUseError) {
       response.status(HttpStatus.CONFLICT).json({
         statusCode: HttpStatus.CONFLICT,
-        message: 'Secretaria possui veículos vinculados.',
+        message: 'Secretaria possui registros vinculados.',
       });
       return;
     }

@@ -85,11 +85,19 @@ export async function seedDemoData(
     await tx.$executeRawUnsafe(`SET LOCAL search_path TO "tenant_demo"`);
     const [secretariat] = await tx.$queryRaw<{ id: string }[]>`
       INSERT INTO secretariats (name) VALUES ('Saúde') RETURNING id`;
-    await tx.$executeRaw`
+    const [vehicle] = await tx.$queryRaw<{ id: string }[]>`
       INSERT INTO vehicles (plate, model, year, type, secretariat_id, status, current_mileage)
       VALUES
         ('ABC1D23', 'Fiat Strada', 2022, 'pickup', ${secretariat.id}::uuid, 'available', 15000),
-        ('EFG4H56', 'VW Saveiro', 2021, 'pickup', ${secretariat.id}::uuid, 'available', 42000)`;
+        ('EFG4H56', 'VW Saveiro', 2021, 'pickup', ${secretariat.id}::uuid, 'available', 42000)
+      RETURNING id`;
+    const [driver] = await tx.$queryRaw<{ id: string }[]>`
+      INSERT INTO drivers (name, cnh_category, cnh_expiry, secretariat_id, status)
+      VALUES ('João Silva', 'D', '2027-05-31', ${secretariat.id}::uuid, 'active')
+      RETURNING id`;
+    await tx.$executeRaw`
+      INSERT INTO driver_authorized_vehicles (driver_id, vehicle_id)
+      VALUES (${driver.id}::uuid, ${vehicle.id}::uuid)`;
   });
   await prisma.$transaction(async (tx) => {
     await tx.$executeRawUnsafe(`SET LOCAL search_path TO "tenant_demo2"`);
@@ -98,6 +106,9 @@ export async function seedDemoData(
     await tx.$executeRaw`
       INSERT INTO vehicles (plate, model, year, type, secretariat_id, status, current_mileage)
       VALUES ('ZZZ9Z99', 'VW Gol', 2020, 'car', ${secretariat.id}::uuid, 'available', 9000)`;
+    await tx.$executeRaw`
+      INSERT INTO drivers (name, cnh_category, cnh_expiry, secretariat_id, status)
+      VALUES ('Maria Souza', 'B', '2028-09-30', ${secretariat.id}::uuid, 'active')`;
   });
 
   return {

@@ -250,4 +250,34 @@ describe('Secretariats (e2e)', () => {
       .set('Authorization', auth())
       .expect(200);
   });
+
+  it('AC12 (M0-F05): deleting a secretariat with a driver returns 409', async () => {
+    const secretariat = await request(app.getHttpServer())
+      .post('/secretarias')
+      .set('Authorization', auth())
+      .send({ name: `Com Motorista ${Date.now()}` })
+      .expect(201);
+    const secretariatId = (secretariat.body as SecretariatBody).id;
+
+    await request(app.getHttpServer())
+      .post('/motoristas')
+      .set('Authorization', auth())
+      .send({
+        name: 'Motorista Vinculo',
+        cnhCategory: 'B',
+        cnhExpiry: '2028-01-31',
+        secretariatId,
+      })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .delete(`/secretarias/${secretariatId}`)
+      .set('Authorization', auth())
+      .expect(409);
+
+    await request(app.getHttpServer())
+      .get(`/secretarias/${secretariatId}`)
+      .set('Authorization', auth())
+      .expect(200);
+  });
 });
