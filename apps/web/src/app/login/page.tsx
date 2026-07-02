@@ -1,15 +1,15 @@
-import { headers } from "next/headers";
-import { Barlow } from "next/font/google";
-import { RiErrorWarningLine, RiTruckLine } from "@remixicon/react";
+import { getAppBaseDomain, getDevTenantSlug } from "@/lib/config";
+import { DEV_EMAIL } from "@/lib/dev-credentials";
+import { tenantSlugFromHost } from "@/lib/tenant-host";
 import {
   Alert,
   AlertDescription,
   AlertTitle,
 } from "@frotas/ui/components/alert";
 import { cn } from "@frotas/ui/lib/utils";
-import { getAppBaseDomain, getDevTenantSlug } from "@/lib/config";
-import { DEV_EMAIL } from "@/lib/dev-credentials";
-import { tenantSlugFromHost } from "@/lib/tenant-host";
+import { RiCarLine, RiErrorWarningLine } from "@remixicon/react";
+import { Barlow } from "next/font/google";
+import { headers } from "next/headers";
 import { LoginFlow } from "./login-flow";
 
 // Wordmark/headings usam Barlow (direção de marca do design importado). Escopo
@@ -33,10 +33,11 @@ export default async function LoginPage() {
       <div className="flex flex-col gap-8 p-8 md:p-11">
         <div className="flex items-center gap-3">
           <span className="flex size-9 items-center justify-center rounded-[9px] bg-primary text-primary-foreground">
-            <RiTruckLine className="size-5" />
+            <RiCarLine className="size-5" />
           </span>
           <span className="font-[family-name:var(--font-brand)] text-[15px] font-bold tracking-[0.3px]">
-            <span className="text-primary">FROTA</span>{" "}
+            <span className="text-primary">FROTA</span>
+            <br />
             <span className="text-success">DIGITAL</span>
           </span>
         </div>
@@ -44,7 +45,7 @@ export default async function LoginPage() {
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-sm">
             {slug ? (
-              <LoginFlow defaultEmail={DEV_EMAIL} tenantSlug={slug} />
+              <LoginFlow defaultEmail={DEV_EMAIL} />
             ) : (
               <Alert variant="destructive">
                 <RiErrorWarningLine />
@@ -79,8 +80,8 @@ export default async function LoginPage() {
             Toda a frota do município, sob controle e transparência.
           </h2>
           <p className="mt-3 max-w-md text-sm leading-relaxed text-primary-foreground/80">
-            Veículos, abastecimento, manutenção e ordens de uso em um só
-            sistema — pronto para prestação de contas.
+            Veículos, abastecimento, manutenção e ordens de uso em um só sistema
+            — pronto para prestação de contas.
           </p>
         </div>
       </div>

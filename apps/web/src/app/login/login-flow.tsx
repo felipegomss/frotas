@@ -8,7 +8,6 @@ import {
   RiEyeOffLine,
 } from "@remixicon/react";
 import { Alert, AlertDescription } from "@frotas/ui/components/alert";
-import { Badge } from "@frotas/ui/components/badge";
 import { Button } from "@frotas/ui/components/button";
 import { Field, FieldGroup, FieldLabel } from "@frotas/ui/components/field";
 import { Input } from "@frotas/ui/components/input";
@@ -36,13 +35,7 @@ function maskEmail(email: string): string {
  * espelhando o Cognito (ADR 0010). A prefeitura vem do subdomínio (F02). Em dev
  * as credenciais e o código são fixos e validados no servidor.
  */
-export function LoginFlow({
-  defaultEmail,
-  tenantSlug,
-}: {
-  defaultEmail: string;
-  tenantSlug: string;
-}) {
+export function LoginFlow({ defaultEmail }: { defaultEmail: string }) {
   const [step, setStep] = useState<Step>("credentials");
   const [email, setEmail] = useState(defaultEmail);
   const [password, setPassword] = useState("");
@@ -178,18 +171,13 @@ export function LoginFlow({
 
   return (
     <div>
-      <div className="mb-7 flex items-center justify-between gap-3">
-        <div>
-          <h1 className="font-[family-name:var(--font-brand)] text-[26px] font-bold leading-[1.15] text-foreground">
-            Bem-vindo de volta
-          </h1>
-          <p className="mt-1.5 text-sm text-muted-foreground">
-            Entre na retaguarda do sistema de gestão da frota.
-          </p>
-        </div>
-        <Badge variant="secondary" className="shrink-0 font-mono">
-          {tenantSlug}
-        </Badge>
+      <div className="mb-7">
+        <h1 className="font-[family-name:var(--font-brand)] text-[26px] font-bold leading-[1.15] text-foreground">
+          Bem-vindo de volta
+        </h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
+          Entre para gerenciar a frota da sua prefeitura.
+        </p>
       </div>
 
       <form onSubmit={submitCredentials}>
