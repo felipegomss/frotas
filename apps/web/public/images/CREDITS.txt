@@ -1,6 +1,6 @@
 Imagens de terceiros usadas no app web.
 
 login-fleet.jpg
-  Fonte: Unsplash — https://unsplash.com/photos/1506521781263-d8422e82f27a
-  Licença: Unsplash License (uso livre, atribuição apreciada).
-  Nota: servida localmente por ora; migrar para CDN futuramente.
+  Fonte: informada pelo usuário — https://cdn.jornaldebrasilia.com.br/wp-content/uploads/2021/01/08111533/Carros.jpg
+  ATENÇÃO: imagem de portal de notícias; licença de reuso NÃO verificada.
+  Placeholder para desenvolvimento; validar direitos e migrar para CDN antes de produção.
