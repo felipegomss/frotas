@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { logoutAction } from "../actions";
 
-// Minimal authenticated shell (header + logout). The DS will replace this shell
-// post-MVP (ADR 0013); keep it simple.
-export default function VeiculosLayout({
+// Minimal authenticated shell (header + nav + logout), mirroring the vehicles
+// shell. The DS will replace this post-MVP (ADR 0013); keep it simple.
+export default function MotoristasLayout({
   children,
 }: {
   children: React.ReactNode;

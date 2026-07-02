@@ -7,9 +7,16 @@ import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
 import { VehicleModule } from './vehicle/vehicle.module';
 import { SecretariatModule } from './secretariat/secretariat.module';
+import { DriverModule } from './driver/driver.module';
 
 @Module({
-  imports: [HealthModule, AuthModule, VehicleModule, SecretariatModule],
+  imports: [
+    HealthModule,
+    AuthModule,
+    VehicleModule,
+    SecretariatModule,
+    DriverModule,
+  ],
   controllers: [AppController],
   providers: [
     AppService,
