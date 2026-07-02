@@ -16,7 +16,7 @@ import { LoginFlow } from "./login-flow";
 
 // Login em etapas espelhando produção (identidade -> 2FA). A prefeitura vem do
 // SUBDOMÍNIO (<slug>.<domínio> — F02), não de escolha do usuário. Em dev o
-// código é fixo (000000) e localhost cai no slug de dev (demo).
+// código é fixo (000000) e localhost cai no slug de dev (prefdemo).
 export default async function LoginPage() {
   const host = (await headers()).get("host") ?? "";
   const slug =
