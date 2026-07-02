@@ -361,7 +361,10 @@ function AppShellUserMenu({
 }) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger render={<Avatar className="size-8" />}>
+      <DropdownMenuTrigger
+        nativeButton={false}
+        render={<Avatar className="size-8" />}
+      >
         <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
           {initialsOf(user.name)}
         </AvatarFallback>
