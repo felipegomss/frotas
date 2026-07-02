@@ -48,3 +48,23 @@ export const VehicleListItem = z.object({
   currentMileage: z.number().int().nonnegative(),
 });
 export type VehicleListItem = z.infer<typeof VehicleListItem>;
+
+// --- Secretariats (M0-F03) -------------------------------------------------
+
+// Body of POST /secretarias and PUT /secretarias/:id.
+export const CreateSecretariatRequest = z.object({
+  name: z.string().trim().min(1),
+});
+export type CreateSecretariatRequest = z.infer<typeof CreateSecretariatRequest>;
+
+export const UpdateSecretariatRequest = CreateSecretariatRequest;
+export type UpdateSecretariatRequest = z.infer<typeof UpdateSecretariatRequest>;
+
+export const SecretariatResponse = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+});
+export type SecretariatResponse = z.infer<typeof SecretariatResponse>;
+
+export const SecretariatListResponse = z.array(SecretariatResponse);
+export type SecretariatListResponse = z.infer<typeof SecretariatListResponse>;
