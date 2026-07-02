@@ -6,10 +6,8 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
+import { TENANT_SCHEMA_NAME_PATTERN } from '@frotas/domain';
 import type { AuthedRequest } from '../auth/session-principal';
-
-// A tenant schema is created as `tenant_<slug>` by the tenant-runner.
-const TENANT_SCHEMA_PATTERN = /^tenant_[a-z0-9_]+$/;
 
 /**
  * Per-request tenant boundary. The schema comes ONLY from the verified session
@@ -28,7 +26,7 @@ export class TenantContext {
     if (!principal) {
       throw new UnauthorizedException('Sessão de tenant ausente.');
     }
-    if (!TENANT_SCHEMA_PATTERN.test(principal.schemaName)) {
+    if (!TENANT_SCHEMA_NAME_PATTERN.test(principal.schemaName)) {
       throw new BadRequestException('Schema de tenant inválido.');
     }
     return principal.schemaName;

@@ -22,6 +22,9 @@
 Form no admin-console -> valida slug -> job de provisionamento (idempotente e transacional):
 cria tenant, cria schema + roda template, seed base, prefixo S3 + Cognito, cria admin + convite,
 marca ativa. Falha faz rollback e marca "failed". Wildcard cobre o subdomínio na hora.
+Validação do slug: formato (regex) + unicidade + blocklist de reservados (o slug é subdomínio, então
+`www`, `api`, `admin`, `status`, `well-known`… são proibidos). A regra vive no domínio
+(`parseTenantSlug` / `RESERVED_TENANT_SLUGS`), reusada pela CLI de ops e pelo form self-service.
 
 ## Domínio próprio da prefeitura (opcional)
 CNAME do órgão -> Cloudflare for SaaS (custom hostname) ou CloudFront+ACM. Não vira on-premise.
