@@ -1,15 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import type { PrefecturesResponse } from "@frotas/contracts";
-import {
-  RiArrowLeftLine,
-  RiArrowRightSLine,
-  RiErrorWarningLine,
-  RiGovernmentLine,
-} from "@remixicon/react";
+import { RiArrowLeftLine, RiErrorWarningLine } from "@remixicon/react";
 import { Alert, AlertDescription } from "@frotas/ui/components/alert";
-import { Badge } from "@frotas/ui/components/badge";
 import { Button } from "@frotas/ui/components/button";
 import {
   Card,
@@ -19,13 +12,10 @@ import {
   CardTitle,
 } from "@frotas/ui/components/card";
 import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@frotas/ui/components/empty";
-import { Field, FieldDescription, FieldLabel } from "@frotas/ui/components/field";
+  Field,
+  FieldDescription,
+  FieldLabel,
+} from "@frotas/ui/components/field";
 import { Input } from "@frotas/ui/components/input";
 import {
   InputOTP,
@@ -34,20 +24,19 @@ import {
   InputOTPSlot,
 } from "@frotas/ui/components/input-otp";
 import { DEV_OTP_LENGTH } from "@/lib/otp";
-import { loginAction, verifyOtpAction } from "./actions";
+import { loginWithOtpAction } from "./actions";
 
-type Step = "identify" | "otp" | "tenant";
+type Step = "identify" | "otp";
 
 /**
- * Fluxo de login em etapas, espelhando o fluxo de produção (ADR 0010):
- * identidade -> código de verificação (2FA) -> escolha da prefeitura.
- * Em dev o código é fixo (000000) até o Cognito entrar.
+ * Fluxo de login em etapas, espelhando produção (ADR 0010): identidade ->
+ * código de verificação (2FA). A prefeitura NÃO é escolhida aqui — vem do
+ * subdomínio (F02). Em dev o código é fixo (000000) até o Cognito entrar.
  */
 export function LoginFlow({ defaultSub }: { defaultSub: string }) {
   const [step, setStep] = useState<Step>("identify");
   const [sub, setSub] = useState(defaultSub);
   const [otp, setOtp] = useState("");
-  const [prefectures, setPrefectures] = useState<PrefecturesResponse>([]);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -61,14 +50,13 @@ export function LoginFlow({ defaultSub }: { defaultSub: string }) {
   function verifyCode(code: string) {
     setError(null);
     startTransition(async () => {
-      const result = await verifyOtpAction(sub, code);
-      if (!result.ok) {
+      // On success the action starts the session and redirects; only an error
+      // object ever comes back here.
+      const result = await loginWithOtpAction(sub, code);
+      if (result && !result.ok) {
         setError(result.message);
         setOtp("");
-        return;
       }
-      setPrefectures(result.prefectures);
-      setStep("tenant");
     });
   }
 
@@ -159,7 +147,7 @@ export function LoginFlow({ defaultSub }: { defaultSub: string }) {
                   className="w-full"
                   disabled={pending || otp.length < DEV_OTP_LENGTH}
                 >
-                  {pending ? "Verificando…" : "Verificar"}
+                  {pending ? "Entrando…" : "Entrar"}
                 </Button>
                 <Button
                   type="button"
@@ -181,69 +169,6 @@ export function LoginFlow({ defaultSub }: { defaultSub: string }) {
                 <span className="font-mono font-medium">000000</span>.
               </p>
             </form>
-          </CardContent>
-        </>
-      )}
-
-      {step === "tenant" && (
-        <>
-          <CardHeader>
-            <CardTitle>Escolha a prefeitura</CardTitle>
-            <CardDescription>
-              Selecione a prefeitura em que deseja atuar nesta sessão.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            {prefectures.length === 0 ? (
-              <Empty className="border border-dashed">
-                <EmptyHeader>
-                  <EmptyMedia variant="icon">
-                    <RiGovernmentLine />
-                  </EmptyMedia>
-                  <EmptyTitle>Nenhuma prefeitura</EmptyTitle>
-                  <EmptyDescription>
-                    Esta identidade não está vinculada a nenhuma prefeitura.
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            ) : (
-              <ul className="grid gap-2">
-                {prefectures.map((p) => (
-                  <li key={p.id}>
-                    <form action={loginAction}>
-                      <input type="hidden" name="tenantId" value={p.id} />
-                      <input type="hidden" name="sub" value={sub} />
-                      <input type="hidden" name="otp" value={otp} />
-                      <Button
-                        type="submit"
-                        variant="outline"
-                        className="h-auto w-full justify-between px-4 py-3"
-                      >
-                        <span className="flex items-center gap-3">
-                          <RiGovernmentLine className="text-muted-foreground" />
-                          <span className="font-medium">{p.name}</span>
-                          <Badge variant="secondary">{p.role}</Badge>
-                        </span>
-                        <RiArrowRightSLine className="text-muted-foreground" />
-                      </Button>
-                    </form>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <Button
-              type="button"
-              variant="ghost"
-              className="w-full text-muted-foreground"
-              onClick={() => {
-                setStep("identify");
-                setOtp("");
-                setError(null);
-              }}
-            >
-              <RiArrowLeftLine />
-              Trocar de identidade
-            </Button>
           </CardContent>
         </>
       )}
