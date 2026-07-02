@@ -1,6 +1,7 @@
 # ADR 0013 - Design System (shadcn/ui + Storybook) entra pós-MVP
 
-Aceito.
+Aceito. Parcialmente atualizado pelo ADR 0014 (tokens e componentes base do DS antecipados
+para o MVP em `packages/ui`; Storybook e biblioteca completa seguem pós-MVP).
 
 ## Decisão
 No MVP (M0), a UI web é construída de forma **simples e funcional**, sem um design system

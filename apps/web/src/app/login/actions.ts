@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { fetchDevIdpToken, startSession } from "@/lib/auth-dev";
 import { getDevIdpSub } from "@/lib/config";
-import { setSessionToken } from "@/lib/session";
+import { setSessionContext, setSessionToken } from "@/lib/session";
 
 /**
  * Dev login: exchanges a fake-IdP token + chosen tenant for the API session
@@ -18,5 +18,10 @@ export async function loginAction(formData: FormData): Promise<void> {
   const idpToken = await fetchDevIdpToken(sub);
   const session = await startSession(idpToken, tenantId);
   await setSessionToken(session.token);
+  // Display-only (shell header); the signed token remains the authority.
+  await setSessionContext({
+    tenantName: session.tenant.name,
+    role: session.role,
+  });
   redirect("/veiculos");
 }
