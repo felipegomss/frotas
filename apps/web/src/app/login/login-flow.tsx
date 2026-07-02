@@ -18,34 +18,43 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "@frotas/ui/components/input-otp";
+import { DEV_PASSWORD } from "@/lib/dev-credentials";
 import { DEV_OTP_LENGTH } from "@/lib/otp";
-import { loginWithOtpAction } from "./actions";
+import { loginWithOtpAction, verifyCredentialsAction } from "./actions";
 
-type Step = "identify" | "otp";
+type Step = "credentials" | "otp";
 
 /**
- * Fluxo de login em etapas, espelhando produção (ADR 0010): identidade ->
+ * Fluxo de login em etapas, espelhando produção (ADR 0010): e-mail + senha ->
  * código de verificação (2FA). A prefeitura NÃO é escolhida aqui — vem do
- * subdomínio (F02). Em dev o código é fixo (000000) até o Cognito entrar.
+ * subdomínio (F02). Em dev as credenciais e o código são fixos até o Cognito.
  */
 export function LoginFlow({
-  defaultSub,
+  defaultEmail,
   tenantSlug,
 }: {
-  defaultSub: string;
+  defaultEmail: string;
   tenantSlug: string;
 }) {
-  const [step, setStep] = useState<Step>("identify");
-  const [sub, setSub] = useState(defaultSub);
+  const [step, setStep] = useState<Step>("credentials");
+  const [email, setEmail] = useState(defaultEmail);
+  const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  function goToOtp(event: React.FormEvent) {
+  function submitCredentials(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
-    setOtp("");
-    setStep("otp");
+    startTransition(async () => {
+      const result = await verifyCredentialsAction(email, password);
+      if (!result.ok) {
+        setError(result.message);
+        return;
+      }
+      setOtp("");
+      setStep("otp");
+    });
   }
 
   function verifyCode(code: string) {
@@ -53,7 +62,7 @@ export function LoginFlow({
     startTransition(async () => {
       // On success the action starts the session and redirects; only an error
       // object ever comes back here.
-      const result = await loginWithOtpAction(sub, code);
+      const result = await loginWithOtpAction(code);
       if (result && !result.ok) {
         setError(result.message);
         setOtp("");
@@ -70,15 +79,15 @@ export function LoginFlow({
     <div className="flex flex-col gap-6">
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="font-heading text-2xl font-semibold">
-          {step === "identify" ? "Entrar" : "Código de verificação"}
+          {step === "credentials" ? "Entrar" : "Código de verificação"}
         </h1>
         <p className="text-sm text-balance text-muted-foreground">
-          {step === "identify" ? (
-            "Informe sua identidade para receber o código de verificação."
+          {step === "credentials" ? (
+            "Acesse com seu e-mail e senha institucionais."
           ) : (
             <>
               Digite o código de {DEV_OTP_LENGTH} dígitos enviado para{" "}
-              <span className="font-medium text-foreground">{sub}</span>.
+              <span className="font-medium text-foreground">{email}</span>.
             </>
           )}
         </p>
@@ -87,26 +96,49 @@ export function LoginFlow({
         </Badge>
       </div>
 
-      {step === "identify" ? (
-        <form onSubmit={goToOtp}>
+      {step === "credentials" ? (
+        <form onSubmit={submitCredentials}>
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="sub">Identidade (sub)</FieldLabel>
+              <FieldLabel htmlFor="email">E-mail</FieldLabel>
               <Input
-                id="sub"
-                name="sub"
-                value={sub}
-                onChange={(event) => setSub(event.target.value)}
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                placeholder="voce@prefeitura.gov.br"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
                 required
               />
-              <FieldDescription>
-                Login de desenvolvimento — em produção será seu e-mail
-                institucional.
-              </FieldDescription>
             </Field>
             <Field>
-              <Button type="submit">Enviar código</Button>
+              <FieldLabel htmlFor="password">Senha</FieldLabel>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                required
+              />
             </Field>
+            <Field>
+              <Button type="submit" disabled={pending}>
+                {pending ? "Verificando…" : "Continuar"}
+              </Button>
+            </Field>
+            {error && (
+              <Alert variant="destructive">
+                <RiErrorWarningLine />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            <FieldDescription className="text-center">
+              Ambiente de desenvolvimento: senha{" "}
+              <span className="font-mono font-medium">{DEV_PASSWORD}</span>.
+            </FieldDescription>
           </FieldGroup>
         </form>
       ) : (
@@ -156,12 +188,12 @@ export function LoginFlow({
                 className="text-muted-foreground"
                 disabled={pending}
                 onClick={() => {
-                  setStep("identify");
+                  setStep("credentials");
                   setError(null);
                 }}
               >
                 <RiArrowLeftLine />
-                Usar outra identidade
+                Voltar
               </Button>
             </Field>
 

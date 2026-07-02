@@ -13,11 +13,8 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@frotas/ui/components/alert";
-import {
-  getAppBaseDomain,
-  getDevIdpSub,
-  getDevTenantSlug,
-} from "@/lib/config";
+import { getAppBaseDomain, getDevTenantSlug } from "@/lib/config";
+import { DEV_EMAIL } from "@/lib/dev-credentials";
 import { tenantSlugFromHost } from "@/lib/tenant-host";
 import { LoginFlow } from "./login-flow";
 
@@ -51,7 +48,7 @@ export default async function LoginPage() {
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-sm">
             {slug ? (
-              <LoginFlow defaultSub={getDevIdpSub()} tenantSlug={slug} />
+              <LoginFlow defaultEmail={DEV_EMAIL} tenantSlug={slug} />
             ) : (
               <Alert variant="destructive">
                 <RiErrorWarningLine />
