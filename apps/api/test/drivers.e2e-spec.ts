@@ -143,15 +143,15 @@ describe('Drivers (e2e)', () => {
       .expect(200);
 
     const names = (res.body as DriverBody[]).map((d) => d.name);
-    expect(names).toContain('João Silva'); // seeded in tenant_demo
-    expect(names).not.toContain('Maria Souza'); // seeded in tenant_demo2
+    expect(names).toContain('João Silva'); // seeded in tenant_prefdemo
+    expect(names).not.toContain('Maria Souza'); // seeded in tenant_prefdemo2
   });
 
   it('AC4: a forged X-Tenant-Schema header is ignored (claim wins)', async () => {
     const res = await request(app.getHttpServer())
       .get('/motoristas')
       .set('Authorization', auth())
-      .set('X-Tenant-Schema', 'tenant_demo2')
+      .set('X-Tenant-Schema', 'tenant_prefdemo2')
       .expect(200);
 
     const names = (res.body as DriverBody[]).map((d) => d.name);

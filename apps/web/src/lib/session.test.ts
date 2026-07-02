@@ -17,9 +17,12 @@ vi.mock("next/headers", () => ({
 
 import {
   SESSION_COOKIE,
+  SESSION_CONTEXT_COOKIE,
   clearSession,
+  getSessionContext,
   getSessionToken,
   sessionCookieOptions,
+  setSessionContext,
   setSessionToken,
 } from "./session";
 
@@ -64,5 +67,39 @@ describe("session cookie read/write/clear (AC2, AC9)", () => {
     await setSessionToken("sess-token");
     await clearSession();
     expect(await getSessionToken()).toBeNull();
+  });
+});
+
+describe("session display context (shell do DS)", () => {
+  beforeEach(() => store.clear());
+
+  it("returns null when no context cookie is set", async () => {
+    expect(await getSessionContext()).toBeNull();
+  });
+
+  it("stores tenant name and role httpOnly and reads them back", async () => {
+    await setSessionContext({ tenantName: "Prefeitura Demo", role: "manager" });
+
+    const entry = store.get(SESSION_CONTEXT_COOKIE);
+    expect((entry?.options as { httpOnly?: boolean }).httpOnly).toBe(true);
+    expect(await getSessionContext()).toEqual({
+      tenantName: "Prefeitura Demo",
+      role: "manager",
+    });
+  });
+
+  it("returns null for a malformed or incomplete cookie", async () => {
+    store.set(SESSION_CONTEXT_COOKIE, { value: "not-json" });
+    expect(await getSessionContext()).toBeNull();
+
+    store.set(SESSION_CONTEXT_COOKIE, { value: JSON.stringify({ role: 1 }) });
+    expect(await getSessionContext()).toBeNull();
+  });
+
+  it("clearSession also clears the display context", async () => {
+    await setSessionToken("sess-token");
+    await setSessionContext({ tenantName: "Prefeitura Demo", role: "manager" });
+    await clearSession();
+    expect(await getSessionContext()).toBeNull();
   });
 });

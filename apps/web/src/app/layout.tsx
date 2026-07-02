@@ -1,19 +1,27 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono, IBM_Plex_Sans, Inter } from "next/font/google";
 import "./globals.css";
+import { cn } from "@frotas/ui/lib/utils";
+import { Providers } from "./providers";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const ibmPlexSans = IBM_Plex_Sans({
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-sans",
+});
+
+const interHeading = Inter({
+  subsets: ["latin"],
+  variable: "--font-heading",
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
   subsets: ["latin"],
+  variable: "--font-geist-mono",
 });
 
 export const metadata: Metadata = {
-  title: "AMPARO Frota",
+  title: "Frota",
   description: "Gestão de frota pública",
 };
 
@@ -25,9 +33,16 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={cn(
+        "h-full font-sans antialiased",
+        ibmPlexSans.variable,
+        interHeading.variable,
+        geistMono.variable,
+      )}
     >
-      <body className="min-h-full bg-zinc-50 text-zinc-900">{children}</body>
+      <body className="min-h-full bg-background text-foreground">
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

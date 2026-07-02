@@ -19,7 +19,7 @@ os veículos daquele tenant — matando o débito do `X-Tenant-Schema` por heade
   caminho por header (`ALLOW_HEADER_TENANT`) é removido.
 - `GET /frota` protegido pelo token de sessão; retorna os veículos disponíveis do tenant da claim
   (reusa o módulo `vehicle`/MOLDE já existente).
-- Seed com dois tenants (`tenant_demo`, `tenant_demo2`) com veículos distintos + identidade e
+- Seed com dois tenants (`tenant_prefdemo`, `tenant_prefdemo2`) com veículos distintos + identidade e
   memberships de demonstração, para provar isolamento.
 
 ## Fora de escopo
@@ -39,9 +39,9 @@ os veículos daquele tenant — matando o débito do `X-Tenant-Schema` por heade
 - [x] AC3: dada uma identidade sem membership ativa na prefeitura pedida, quando chama `POST /sessao`
   para aquele tenant, então 403 e nenhum token é emitido.
 - [x] AC4: dado um token de sessão válido para a prefeitura A, quando chama `GET /frota`, então
-  retorna somente os veículos de A (nenhum veículo de `tenant_demo2` aparece).
+  retorna somente os veículos de A (nenhum veículo de `tenant_prefdemo2` aparece).
 - [x] AC5: dado um token de sessão para a prefeitura A, quando a requisição também envia um header
-  `X-Tenant-Schema: tenant_demo2` forjado, então o header é ignorado e a resposta continua sendo a
+  `X-Tenant-Schema: tenant_prefdemo2` forjado, então o header é ignorado e a resposta continua sendo a
   frota de A — o schema vem só da claim assinada.
 - [x] AC6: dada uma requisição a `GET /frota` sem token de sessão ou com assinatura inválida/adulterada,
   então 401 e nenhum dado de tenant é acessado.
@@ -84,3 +84,14 @@ os veículos daquele tenant — matando o débito do `X-Tenant-Schema` por heade
   tenants; documentar o pré-requisito. Ver [[toolchain-nvm-path]].
 - Segurança: toca auth **e** dado de tenant → revisão `revisar-tenant` é obrigatória antes do commit.
 - Decidido: smoke web adiado para M0-F04; ADR 0010 registrado antes de codar.
+
+## Nota de evolução (jul/2026, redesign do DS)
+O fluxo web de login mudou de "lista de prefeituras para seleção" para o fluxo
+espelhando produção: a prefeitura é resolvida pelo **subdomínio** do Host
+(`<slug>.<domínio>` — F02, `apps/web/src/lib/tenant-host.ts`), e o login pede
+identidade + código 2FA (OTP fixo `000000` em dev, validado no servidor —
+`apps/web/src/lib/otp.ts`) até o Cognito entrar (ADR 0010). `GET
+/sessao/prefeituras` segue existindo: o web o usa para casar o slug do host com
+as memberships da identidade; a autoridade continua sendo o token assinado.
+Em dev, `localhost` sem subdomínio cai em `DEV_TENANT_SLUG` (default `prefdemo`);
+`<slug>.localhost` também funciona.

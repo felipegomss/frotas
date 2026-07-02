@@ -1,0 +1,14 @@
+{
+  "extends": "@frotas/config/tsconfig.base.json",
+  "compilerOptions": {
+    "composite": false,
+    "declaration": false,
+    "noEmit": true,
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "jsx": "react-jsx",
+    "paths": {
+      "@frotas/ui/*": ["./src/*"]
+    }
+  },
+  "include": ["src"]
+}

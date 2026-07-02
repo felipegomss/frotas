@@ -173,7 +173,7 @@ describe('Vehicles (e2e)', () => {
     const res = await request(app.getHttpServer())
       .get('/veiculos')
       .set('Authorization', auth())
-      .set('X-Tenant-Schema', 'tenant_demo2')
+      .set('X-Tenant-Schema', 'tenant_prefdemo2')
       .expect(200);
 
     const plates = (res.body as VehicleBody[]).map((v) => v.plate);

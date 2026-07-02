@@ -22,8 +22,8 @@ async function main(): Promise<void> {
       name: "Gestor Demo",
     });
     console.log(
-      'Seed ok: identity "gestor@demo.gov.br" (member of demo), ' +
-        "tenants demo + demo2 provisioned with vehicles.",
+      'Seed ok: identity "gestor@demo.gov.br" (member of prefdemo), ' +
+        "tenants prefdemo + prefdemo2 provisioned with vehicles.",
     );
   } finally {
     await prisma.$disconnect();

@@ -39,4 +39,37 @@ export async function setSessionToken(token: string): Promise<void> {
 export async function clearSession(): Promise<void> {
   const store = await cookies();
   store.delete(SESSION_COOKIE);
+  store.delete(SESSION_CONTEXT_COOKIE);
+}
+
+// Display-only context for the shell (tenant name + role). NOT an authority:
+// the API decides the tenant from the signed token; this only fills the UI.
+export const SESSION_CONTEXT_COOKIE = "frotas_session_ctx";
+
+export interface SessionContext {
+  tenantName: string;
+  role: string;
+}
+
+export async function setSessionContext(ctx: SessionContext): Promise<void> {
+  const store = await cookies();
+  store.set(SESSION_CONTEXT_COOKIE, JSON.stringify(ctx), sessionCookieOptions());
+}
+
+export async function getSessionContext(): Promise<SessionContext | null> {
+  const store = await cookies();
+  const raw = store.get(SESSION_CONTEXT_COOKIE)?.value;
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as Partial<SessionContext>;
+    if (
+      typeof parsed.tenantName !== "string" ||
+      typeof parsed.role !== "string"
+    ) {
+      return null;
+    }
+    return { tenantName: parsed.tenantName, role: parsed.role };
+  } catch {
+    return null;
+  }
 }

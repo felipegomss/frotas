@@ -69,7 +69,7 @@ describe('Auth + tenant isolation (e2e)', () => {
 
     const body = res.body as PrefectureBody[];
     expect(body).toHaveLength(1);
-    expect(body[0]).toMatchObject({ slug: 'demo', role: 'manager' });
+    expect(body[0]).toMatchObject({ slug: 'prefdemo', role: 'manager' });
   });
 
   it('AC1: POST /sessao mints a signed session token with the tenant claim', async () => {
@@ -83,7 +83,7 @@ describe('Auth + tenant isolation (e2e)', () => {
 
     const body = res.body as SessionBody;
     expect(typeof body.token).toBe('string');
-    expect(body.tenant).toMatchObject({ slug: 'demo' });
+    expect(body.tenant).toMatchObject({ slug: 'prefdemo' });
     expect(body.role).toBe('manager');
   });
 
@@ -162,7 +162,7 @@ describe('Auth + tenant isolation (e2e)', () => {
     const res = await request(app.getHttpServer())
       .get('/frota')
       .set('Authorization', bearer(token))
-      .set('X-Tenant-Schema', 'tenant_demo2')
+      .set('X-Tenant-Schema', 'tenant_prefdemo2')
       .expect(200);
 
     const plates = (res.body as VehicleBody[]).map((v) => v.plate);

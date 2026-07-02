@@ -6,6 +6,8 @@ import { PrismaClient } from "./generated/client/client.js";
 export * from "./generated/client/client.js";
 export { applyTenantTemplate, provisionTenant } from "./tenant-runner.js";
 export {
+  SEED_TENANT,
+  SEED_TENANT_B,
   seedDemoData,
   type SeedDemoOptions,
   type SeededDemo,
