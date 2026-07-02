@@ -84,16 +84,16 @@ claim assinada. Introduz o agregado `driver` como módulo hexagonal próprio (es
   veículo autorizado a um motorista) continuam funcionando.
 
 ### Web (fase B)
-- [ ] AC14: dada uma sessão válida, quando abro `/motoristas`, então vejo a lista dos motoristas do
+- [x] AC14: dada uma sessão válida, quando abro `/motoristas`, então vejo a lista dos motoristas do
   tenant (nome, CNH categoria/validade, secretaria, status), buscada no servidor com o bearer.
-- [ ] AC15: dado o formulário de criação, quando submeto válido, então o BFF faz `POST /motoristas` e
+- [x] AC15: dado o formulário de criação, quando submeto válido, então o BFF faz `POST /motoristas` e
   o motorista aparece na lista; entradas inválidas mostram erro inline (Zod do contrato) antes do
   submit; o campo secretaria lista `GET /secretarias` e os veículos autorizados listam `GET /veiculos`.
-- [ ] AC16: dado um motorista existente, quando abro "editar", o form vem pré-preenchido (inclusive as
+- [x] AC16: dado um motorista existente, quando abro "editar", o form vem pré-preenchido (inclusive as
   autorizações marcadas) e o submit faz `PUT /motoristas/:id`, refletindo a mudança.
-- [ ] AC17: dado um motorista existente, quando confirmo "excluir", o BFF faz `DELETE /motoristas/:id`
+- [x] AC17: dado um motorista existente, quando confirmo "excluir", o BFF faz `DELETE /motoristas/:id`
   e ele some da lista; erro da API (404/409/400) exibe mensagem legível sem quebrar a UI.
-- [ ] AC18 (segurança): o token de sessão nunca chega ao JS do cliente (só cookie httpOnly); a web
+- [x] AC18 (segurança): o token de sessão nunca chega ao JS do cliente (só cookie httpOnly); a web
   nunca decide tenant (herdado de F04b).
 
 ## Testes que provam cada critério (TDD — escritos antes do código)
