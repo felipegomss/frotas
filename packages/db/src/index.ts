@@ -4,7 +4,7 @@ import { PrismaClient } from "./generated/client/client.js";
 // Public surface of the control-plane client: PrismaClient, Prisma namespace,
 // enums and model types are all re-exported from the generated barrel.
 export * from "./generated/client/client.js";
-export { provisionTenant } from "./tenant-runner.js";
+export { applyTenantTemplate, provisionTenant } from "./tenant-runner.js";
 export {
   seedDemoData,
   type SeedDemoOptions,
