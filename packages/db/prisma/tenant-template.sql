@@ -11,7 +11,9 @@ CREATE TABLE users (
 );
 CREATE TABLE vehicles (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  plate text NOT NULL UNIQUE, model text,
+  plate text NOT NULL UNIQUE, model text NOT NULL,
+  year integer NOT NULL, type text NOT NULL,
+  secretariat_id uuid NOT NULL REFERENCES secretariats(id),
   status text NOT NULL DEFAULT 'available',
   current_mileage integer NOT NULL DEFAULT 0
 );

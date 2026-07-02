@@ -1,29 +1,26 @@
 import { describe, it, expect } from "vitest";
 import { Vehicle } from "./vehicle.entity.js";
-import { VehicleRepository } from "./vehicle.repository.js";
 import { ListAvailableVehicles } from "./list-available-vehicles.usecase.js";
+import { FakeVehicleRepository } from "./testing/fake-vehicle-repository.js";
 
-class FakeVehicleRepository implements VehicleRepository {
-  constructor(private readonly vehicles: Vehicle[]) {}
-  findById(id: string): Promise<Vehicle | null> {
-    return Promise.resolve(this.vehicles.find((v) => v.id === id) ?? null);
-  }
-  listAvailable(): Promise<Vehicle[]> {
-    return Promise.resolve(
-      this.vehicles.filter((v) => v.status === "available"),
-    );
-  }
-  save(): Promise<void> {
-    return Promise.resolve();
-  }
-}
+const attrs = {
+  model: "Fiat Strada",
+  year: 2022,
+  type: "pickup" as const,
+  secretariatId: "secretariat-1",
+};
 
 describe("ListAvailableVehicles", () => {
   it("returns only the available vehicles from the port", async () => {
     const repo = new FakeVehicleRepository([
-      new Vehicle("1", "ABC1D23", "available", 1000),
-      new Vehicle("2", "EFG4H56", "in_maintenance", 2000),
-      new Vehicle("3", "IJK7L89", "available", 3000),
+      new Vehicle("1", { ...attrs, plate: "ABC1D23", currentMileage: 1000 }),
+      new Vehicle("2", {
+        ...attrs,
+        plate: "EFG4H56",
+        currentMileage: 2000,
+        status: "inactive",
+      }),
+      new Vehicle("3", { ...attrs, plate: "IJK7L89", currentMileage: 3000 }),
     ]);
     const useCase = new ListAvailableVehicles(repo);
 

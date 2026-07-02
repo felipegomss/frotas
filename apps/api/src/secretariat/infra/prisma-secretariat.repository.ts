@@ -3,33 +3,17 @@ import { Prisma } from '@frotas/db';
 import {
   DuplicateSecretariatNameError,
   Secretariat,
+  SecretariatInUseError,
   type SecretariatRepository,
 } from '@frotas/domain';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TenantContext } from '../../tenant/tenant-context';
+import {
+  isPostgresError,
+  POSTGRES_FOREIGN_KEY_VIOLATION,
+  POSTGRES_UNIQUE_VIOLATION,
+} from '../../common/postgres-error';
 import { toSecretariat, type SecretariatRow } from './secretariat.mapper';
-
-// SQLSTATE for a Postgres unique_violation — stable across Postgres/driver versions.
-const POSTGRES_UNIQUE_VIOLATION = '23505';
-
-/** Shape of `error.meta` that the pg driver adapter attaches to a raw-query failure. */
-interface DriverAdapterErrorMeta {
-  driverAdapterError?: {
-    cause?: {
-      originalCode?: string;
-    };
-  };
-}
-
-/** True when a raw query failed on the `secretariats.name` unique constraint. */
-function isDuplicateNameViolation(error: unknown): boolean {
-  if (!(error instanceof Prisma.PrismaClientKnownRequestError)) return false;
-  if (error.code !== 'P2010') return false;
-  const meta = error.meta as DriverAdapterErrorMeta | undefined;
-  return (
-    meta?.driverAdapterError?.cause?.originalCode === POSTGRES_UNIQUE_VIOLATION
-  );
-}
 
 /**
  * Tenant data adapter (ADR 0005): `secretariats` is a tenant table, not a Prisma
@@ -88,7 +72,7 @@ export class PrismaSecretariatRepository implements SecretariatRepository {
           VALUES (${secretariat.id}, ${secretariat.name})
           ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name`;
       } catch (error) {
-        if (isDuplicateNameViolation(error)) {
+        if (isPostgresError(error, POSTGRES_UNIQUE_VIOLATION)) {
           throw new DuplicateSecretariatNameError(secretariat.name);
         }
         throw error;
@@ -98,7 +82,14 @@ export class PrismaSecretariatRepository implements SecretariatRepository {
 
   delete(id: string): Promise<void> {
     return this.withTenant(async (tx) => {
-      await tx.$executeRaw`DELETE FROM secretariats WHERE id = ${id}`;
+      try {
+        await tx.$executeRaw`DELETE FROM secretariats WHERE id = ${id}`;
+      } catch (error) {
+        if (isPostgresError(error, POSTGRES_FOREIGN_KEY_VIOLATION)) {
+          throw new SecretariatInUseError(id);
+        }
+        throw error;
+      }
     });
   }
 }

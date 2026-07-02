@@ -5,26 +5,35 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import {
+  DuplicatePlateError,
   DuplicateSecretariatNameError,
   MembershipNotFoundError,
+  SecretariatInUseError,
   SecretariatNotFoundError,
+  VehicleNotFoundError,
 } from '@frotas/domain';
 import type { Response } from 'express';
 
 type DomainError =
   | MembershipNotFoundError
   | SecretariatNotFoundError
-  | DuplicateSecretariatNameError;
+  | DuplicateSecretariatNameError
+  | SecretariatInUseError
+  | VehicleNotFoundError
+  | DuplicatePlateError;
 
 /**
  * Maps domain errors to HTTP at the edge (roadmap fase 4). No active membership
  * in the requested tenant → 403 (ADR 0010: no membership, no session token).
- * Not-found / duplicate-name domain errors → 404 / 409.
+ * Not-found → 404. Duplicate-name/plate and in-use → 409.
  */
 @Catch(
   MembershipNotFoundError,
   SecretariatNotFoundError,
   DuplicateSecretariatNameError,
+  SecretariatInUseError,
+  VehicleNotFoundError,
+  DuplicatePlateError,
 )
 export class DomainExceptionFilter implements ExceptionFilter {
   catch(exception: DomainError, host: ArgumentsHost): void {
@@ -40,6 +49,27 @@ export class DomainExceptionFilter implements ExceptionFilter {
       response.status(HttpStatus.NOT_FOUND).json({
         statusCode: HttpStatus.NOT_FOUND,
         message: 'Secretaria não encontrada.',
+      });
+      return;
+    }
+    if (exception instanceof VehicleNotFoundError) {
+      response.status(HttpStatus.NOT_FOUND).json({
+        statusCode: HttpStatus.NOT_FOUND,
+        message: 'Veículo não encontrado.',
+      });
+      return;
+    }
+    if (exception instanceof SecretariatInUseError) {
+      response.status(HttpStatus.CONFLICT).json({
+        statusCode: HttpStatus.CONFLICT,
+        message: 'Secretaria possui veículos vinculados.',
+      });
+      return;
+    }
+    if (exception instanceof DuplicatePlateError) {
+      response.status(HttpStatus.CONFLICT).json({
+        statusCode: HttpStatus.CONFLICT,
+        message: 'Já existe um veículo com esta placa.',
       });
       return;
     }
