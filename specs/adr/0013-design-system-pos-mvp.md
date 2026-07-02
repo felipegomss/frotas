@@ -1,6 +1,6 @@
 # ADR 0013 - Design System (shadcn/ui + Storybook) entra pós-MVP
 
-Aceito. Parcialmente atualizado pelo ADR 0014 (tokens e componentes base do DS antecipados
+Aceito. Parcialmente atualizado pelo ADR 0015 (tokens e componentes base do DS antecipados
 para o MVP em `packages/ui`; Storybook e biblioteca completa seguem pós-MVP).
 
 ## Decisão

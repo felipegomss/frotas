@@ -8,7 +8,7 @@ Estado: TanStack Query (servidor) + Zustand (UI). Dado de servidor NÃO vai no Z
 Formulários: React Hook Form + Zod (schema de @frotas/contracts).
 Listas: TanStack Table. Gráficos: Recharts. Datas: date-fns. Ícones: @remixicon/react.
 Design System: tokens e componentes base compartilhados em `@frotas/ui` (shadcn preset
-`base-vega`, primitivos Base UI, paleta da logo) — ver ADR 0014 e `packages/ui/README.md`.
+`base-vega`, primitivos Base UI, paleta da logo) — ver ADR 0015 e `packages/ui/README.md`.
 Componentes shadcn entram sob demanda via `pnpm dlx shadcn add`. O DS formal
 (Storybook, catálogo, componentes mobile via NativeWind) entra pós-MVP — ver ADR 0013.
 

@@ -1,4 +1,4 @@
-# ADR 0014 - Tokens e componentes base do DS antecipados em `packages/ui`
+# ADR 0015 - Tokens e componentes base do DS antecipados em `packages/ui`
 
 Aceito. Atualiza parcialmente o ADR 0013 (que segue válido para Storybook e biblioteca completa).
 

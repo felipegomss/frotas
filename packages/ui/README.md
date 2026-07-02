@@ -50,7 +50,7 @@ Depois rode `pnpm lint --fix` neste pacote (formatação prettier).
 Os tokens são variáveis CSS puras (`:root`/`.dark`) e serão consumidos no mobile
 via NativeWind, reutilizando este mesmo arquivo de tema. Os componentes deste
 pacote são web-only; a estratégia de componentes nativos (NativeWind + lib a
-definir) será decidida na fase do DS formal (pós-MVP, ADR 0013/0014).
+definir) será decidida na fase do DS formal (pós-MVP, ADR 0013/0015).
 
 ## Escopo (MVP)
 
