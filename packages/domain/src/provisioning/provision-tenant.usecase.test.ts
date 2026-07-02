@@ -8,6 +8,7 @@ import type {
 } from "./admin-identity.directory.js";
 import {
   InvalidTenantSlugError,
+  ReservedTenantSlugError,
   TenantAlreadyActiveError,
 } from "./provisioning.errors.js";
 import { ProvisionTenant } from "./provision-tenant.usecase.js";
@@ -189,6 +190,21 @@ describe("ProvisionTenant", () => {
 
       await expect(useCase.execute({ ...input, slug })).rejects.toBeInstanceOf(
         InvalidTenantSlugError,
+      );
+
+      expect(tenants.created).toHaveLength(0);
+      expect(tenants.statusChanges).toHaveLength(0);
+      expect(provisioner.calls).toHaveLength(0);
+    },
+  );
+
+  it.each(["www", "api", "admin", "status", "well-known", "demo"])(
+    "rejects the reserved slug %j without touching any port (AC9)",
+    async (slug) => {
+      const { useCase, tenants, provisioner } = makeUseCase({});
+
+      await expect(useCase.execute({ ...input, slug })).rejects.toBeInstanceOf(
+        ReservedTenantSlugError,
       );
 
       expect(tenants.created).toHaveLength(0);

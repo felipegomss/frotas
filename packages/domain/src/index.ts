@@ -4,6 +4,7 @@ export * from "./vehicle/list-available-vehicles.usecase.js";
 export * from "./audit/audit-entry.js";
 export * from "./audit/audit-chain.js";
 export * from "./provisioning/provisioning.errors.js";
+export * from "./provisioning/reserved-slugs.js";
 export * from "./provisioning/tenant-slug.js";
 export * from "./provisioning/tenant.directory.js";
 export * from "./provisioning/admin-identity.directory.js";

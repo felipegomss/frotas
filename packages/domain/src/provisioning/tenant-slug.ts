@@ -1,4 +1,8 @@
-import { InvalidTenantSlugError } from "./provisioning.errors.js";
+import {
+  InvalidTenantSlugError,
+  ReservedTenantSlugError,
+} from "./provisioning.errors.js";
+import { RESERVED_TENANT_SLUGS } from "./reserved-slugs.js";
 
 /**
  * Whitelist for tenant slugs: lowercase letter first, then lowercase letters,
@@ -25,6 +29,9 @@ export interface TenantSlug {
 export function parseTenantSlug(raw: string): TenantSlug {
   if (!TENANT_SLUG_PATTERN.test(raw)) {
     throw new InvalidTenantSlugError(raw);
+  }
+  if (RESERVED_TENANT_SLUGS.has(raw)) {
+    throw new ReservedTenantSlugError(raw);
   }
   return { value: raw, schemaName: `tenant_${raw}` };
 }

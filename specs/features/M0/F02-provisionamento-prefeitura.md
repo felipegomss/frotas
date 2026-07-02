@@ -16,6 +16,10 @@ iniciando a trilha de auditoria com hash encadeado no schema recém-criado.
   auditoria numa única transação → marca `active`; falha marca `failed` e permite retry.
 - Validação estrita do slug no domínio (minúsculas/dígitos/hífen, começa com letra, tamanho
   limitado) — o slug vira nome de schema interpolado em DDL, então é fronteira de segurança.
+- Blocklist de slugs reservados no domínio: o slug também vira subdomínio (`<slug>.dominio.com.br`,
+  specs/arquitetura/multi-tenant.md), então nomes de infra/aplicação (`www`, `api`, `admin`, `status`,
+  `well-known`…) são rejeitados antes de tocar qualquer porta. Fonte única reusável (CLI hoje,
+  self-service pós-M0).
 - 1º admin: identity global nova ou reusada por CPF (ADR 0003), membership `admin` ativa no tenant
   e linha em `users` do schema do tenant referenciando a identity (seed base).
 - Esqueleto da auditoria: tipos + hash encadeado (sha256) + verificação de cadeia como funções
@@ -35,6 +39,9 @@ iniciando a trilha de auditoria com hash encadeado no schema recém-criado.
 - Enforcement append-only por RLS e espelho S3 Object Lock (WORM) — nesta fatia a inviolabilidade
   é a cadeia de hash verificável; RLS/WORM ficam para a trilha de segurança posterior.
 - Auditar as demais escritas do sistema (F03+ passam a consumir o esqueleto criado aqui).
+- Exibir a blocklist de reservados na tela de criação de tenant (para o operador saber o que não
+  pode usar) — é do console de onboarding self-service (pós-M0); a lista já nasce exportada do
+  domínio para essa UI consumir depois.
 
 ## Critérios de aceite (cada um vira ao menos um teste)
 - [x] AC1: dado slug/nome/dados do admin válidos e slug inédito, quando o provisionamento roda,
@@ -55,6 +62,9 @@ iniciando a trilha de auditoria com hash encadeado no schema recém-criado.
   recomeça do zero e termina `active` (retry idempotente).
 - [x] AC8: dada uma cadeia de auditoria com N registros, quando um registro é adulterado, então a
   verificação acusa a quebra; um novo append referencia o hash do registro anterior.
+- [x] AC9: dado um slug reservado (`www`, `api`, `admin`, `status`, `well-known`, `demo`…), quando
+  chama o caso de uso, então erro de domínio (`ReservedTenantSlugError`) e nenhum efeito no banco
+  (nem linha de tenant, nem schema) — o slug seria um subdomínio de infra/aplicação.
 
 ## Testes que provam cada critério (TDD — escritos antes do código)
 - Domínio (vitest, `packages/domain`):
@@ -108,7 +118,10 @@ iniciando a trilha de auditoria com hash encadeado no schema recém-criado.
   (pós-M0). No fluxo síncrono por script, o status do tenant (`provisioning`/`active`/`failed`) +
   auditoria bastam.
 - **Decisão — seed-demo não passa pelo caso de uso:** `packages/db` não pode depender dos adapters
-  da API; o seed continua na primitiva de baixo nível (mesmo template, sem drift).
+  da API; o seed continua na primitiva de baixo nível (mesmo template, sem drift). Corolário: a
+  blocklist de reservados vive no caso de uso (`parseTenantSlug`), não na primitiva — por isso os
+  slugs de fixture `demo`/`demo2` (que constam na lista) continuam funcionando no seed, enquanto o
+  onboarding real via caso de uso os rejeita.
 - Risco: testes de integração dependem do Postgres compartilhado `frotas-db-1`
   (ver [[toolchain-nvm-path]]); schemas/slugs de teste próprios e descartáveis para não colidir
   com o seed de dev.

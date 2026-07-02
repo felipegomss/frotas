@@ -39,4 +39,5 @@ Escopo aberto por sistema externo. DoD: por integração contratada.
 
 ## Console de onboarding self-service  (depende de M0)
 Provisionamento existe por script desde o início; a TELA self-service só depois que uma
-prefeitura funciona ponta a ponta em M0.
+prefeitura funciona ponta a ponta em M0. A tela deve exibir a blocklist de slugs reservados
+(já exportada do domínio, `RESERVED_TENANT_SLUGS`) para o operador saber o que não pode usar.
