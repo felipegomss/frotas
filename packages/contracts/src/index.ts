@@ -124,3 +124,53 @@ export const VehicleDetailListResponse = z.array(VehicleResponse);
 export type VehicleDetailListResponse = z.infer<
   typeof VehicleDetailListResponse
 >;
+
+// --- Drivers (M0-F05, ADR 0014) --------------------------------------------
+
+// Brazilian CNH categories (EN in code; PT label in the UI).
+export const CnhCategory = z.enum([
+  "A",
+  "B",
+  "C",
+  "D",
+  "E",
+  "AB",
+  "AC",
+  "AD",
+  "AE",
+]);
+export type CnhCategory = z.infer<typeof CnhCategory>;
+
+// Administrative status assignable by this CRUD.
+export const DriverStatus = z.enum(["active", "inactive"]);
+export type DriverStatus = z.infer<typeof DriverStatus>;
+
+// Body of POST /motoristas and PUT /motoristas/:id (full replace). The CNH
+// expiry is a plain calendar date (YYYY-MM-DD); a past date is allowed (the
+// expiry alert belongs to the alerts module, not this CRUD).
+export const CreateDriverRequest = z.object({
+  name: z.string().trim().min(1),
+  cnhCategory: CnhCategory,
+  cnhExpiry: z.string().date(),
+  secretariatId: z.string().uuid(),
+  authorizedVehicleIds: z.array(z.string().uuid()).default([]),
+  status: DriverStatus.optional(),
+});
+export type CreateDriverRequest = z.infer<typeof CreateDriverRequest>;
+
+export const UpdateDriverRequest = CreateDriverRequest;
+export type UpdateDriverRequest = z.infer<typeof UpdateDriverRequest>;
+
+export const DriverResponse = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  cnhCategory: CnhCategory,
+  cnhExpiry: z.string(),
+  secretariatId: z.string().uuid(),
+  status: z.string(),
+  authorizedVehicleIds: z.array(z.string().uuid()),
+});
+export type DriverResponse = z.infer<typeof DriverResponse>;
+
+export const DriverListResponse = z.array(DriverResponse);
+export type DriverListResponse = z.infer<typeof DriverListResponse>;
