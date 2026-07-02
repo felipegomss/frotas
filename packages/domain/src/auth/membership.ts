@@ -8,7 +8,7 @@ export interface ActiveMembership {
   tenantId: string;
   tenantSlug: string;
   tenantName: string;
-  /** Postgres schema of the tenant (e.g. `tenant_demo`). Drives search_path. */
+  /** Postgres schema of the tenant (e.g. `tenant_lages`). Drives search_path. */
   schemaName: string;
   role: string;
 }

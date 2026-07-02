@@ -122,7 +122,7 @@ describe('Secretariats (e2e)', () => {
     const res = await request(app.getHttpServer())
       .get('/secretarias')
       .set('Authorization', auth())
-      .set('X-Tenant-Schema', 'tenant_demo2')
+      .set('X-Tenant-Schema', 'tenant_prefdemo2')
       .expect(200);
 
     const names = (res.body as SecretariatBody[]).map((s) => s.name);

@@ -17,7 +17,7 @@ motoristas (M0-F05), com o dado isolado por schema e o tenant vindo só da claim
 - Todas as rotas protegidas por `SessionGuard`; o schema vem exclusivamente da claim (ADR 0010).
 - Acesso ao dado por `$queryRaw` + `SET LOCAL search_path` em transação (ADR 0005), via o mapper —
   tipo do Prisma nunca cruza a fronteira do repositório.
-- Seed: uma secretaria em `tenant_demo` e outra em `tenant_demo2`, para provar isolamento.
+- Seed: uma secretaria em `tenant_prefdemo` e outra em `tenant_prefdemo2`, para provar isolamento.
 
 ## Fora de escopo
 - RBAC por papel: qualquer membership ativa pode gerir (herda o out-of-scope da M0-F01).
@@ -33,8 +33,8 @@ motoristas (M0-F05), com o dado isolado por schema e o tenant vindo só da claim
   nenhuma secretaria é criada.
 - [x] AC3: dado `name` vazio/em branco, quando `POST /secretarias`, então 400 (validação Zod).
 - [x] AC4: dada uma sessão no tenant A, quando `GET /secretarias`, então retorna só as secretarias de
-  A — a secretaria seedada em `tenant_demo2` não aparece.
-- [x] AC5: dada uma sessão no tenant A com header forjado `X-Tenant-Schema: tenant_demo2`, então o
+  A — a secretaria seedada em `tenant_prefdemo2` não aparece.
+- [x] AC5: dada uma sessão no tenant A com header forjado `X-Tenant-Schema: tenant_prefdemo2`, então o
   header é ignorado e a lista continua sendo a de A.
 - [x] AC6: dada uma requisição a qualquer rota `/secretarias` sem token de sessão ou com token
   inválido/adulterado, então 401 e nenhum dado de tenant é acessado.
@@ -75,7 +75,7 @@ motoristas (M0-F05), com o dado isolado por schema e o tenant vindo só da claim
    Ampliar `DomainExceptionFilter` para mapear os novos erros de domínio (centraliza erro→HTTP,
    fase 4).
 4. **db** (`packages/db`): `UNIQUE` em `secretariats.name` no `prisma/tenant-template.sql`; em
-   `src/seed-demo.ts`, inserir uma secretaria em cada tenant (`tenant_demo`, `tenant_demo2`) para
+   `src/seed-demo.ts`, inserir uma secretaria em cada tenant (`tenant_prefdemo`, `tenant_prefdemo2`) para
    provar isolamento (AC4). Schemas são recriados pelo seed (idempotente).
 
 ## Riscos e decisões

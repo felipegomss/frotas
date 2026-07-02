@@ -61,8 +61,8 @@ claim assinada. Introduz o agregado `driver` como módulo hexagonal próprio (es
   (não `YYYY-MM-DD` / data inexistente), ou `status` fora de `active|inactive`, quando `POST/PUT
   /motoristas`, então 400 (validação Zod / invariante de domínio).
 - [x] AC3: dada uma sessão no tenant A, quando `GET /motoristas`, então retorna só os motoristas de A —
-  o motorista seedado em `tenant_demo2` não aparece (isolamento).
-- [x] AC4: dada uma sessão no tenant A com header forjado `X-Tenant-Schema: tenant_demo2`, então o
+  o motorista seedado em `tenant_prefdemo2` não aparece (isolamento).
+- [x] AC4: dada uma sessão no tenant A com header forjado `X-Tenant-Schema: tenant_prefdemo2`, então o
   header é ignorado e a lista continua sendo a de A.
 - [x] AC5: dada uma requisição a qualquer rota `/motoristas` sem token de sessão ou com token
   inválido/adulterado, então 401 e nenhum dado de tenant é acessado.
@@ -152,8 +152,8 @@ claim assinada. Introduz o agregado `driver` como módulo hexagonal próprio (es
      (driver_id, vehicle_id))` (nomear as constraints de FK).
    - Reapontar `usage_orders.driver_id` e `refuelings.driver_id` de `users(id)` → `drivers(id)`
      (tabelas ainda sem uso; coerência do modelo antes de M0-F06/F07).
-   - `src/seed-demo.ts`: inserir um motorista em `tenant_demo` (com 1 veículo autorizado) e outro em
-     `tenant_demo2`, para provar isolamento (AC3).
+   - `src/seed-demo.ts`: inserir um motorista em `tenant_prefdemo` (com 1 veículo autorizado) e outro em
+     `tenant_prefdemo2`, para provar isolamento (AC3).
 5. **web** (`apps/web/src/app/motoristas/` + `lib/drivers.ts`), reusando a fundação de F04b:
    - `lib/drivers.ts`: `listDrivers/getDriver/createDriver/updateDriver/deleteDriver` (reusa
      `apiFetch`, `requireSession`, `listSecretariats`, `listVehicles`).

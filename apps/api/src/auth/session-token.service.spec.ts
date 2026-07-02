@@ -5,7 +5,7 @@ import type { SessionPrincipal } from './session-principal';
 const principal: SessionPrincipal = {
   identityId: 'id-1',
   tenantId: 't-a',
-  schemaName: 'tenant_demo',
+  schemaName: 'tenant_prefdemo',
   role: 'manager',
 };
 

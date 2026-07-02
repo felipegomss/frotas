@@ -24,5 +24,5 @@ export function getAppBaseDomain(): string {
 // In production the subdomain is mandatory.
 export function getDevTenantSlug(): string | null {
   if (process.env.NODE_ENV === "production") return null;
-  return process.env.DEV_TENANT_SLUG ?? "demo";
+  return process.env.DEV_TENANT_SLUG ?? "prefdemo";
 }

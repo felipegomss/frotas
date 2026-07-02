@@ -28,9 +28,9 @@ describe("StartTenantSession", () => {
   const membershipA: ActiveMembership = {
     identityId: "id-1",
     tenantId: "t-a",
-    tenantSlug: "demo",
+    tenantSlug: "prefdemo",
     tenantName: "Prefeitura Demo",
-    schemaName: "tenant_demo",
+    schemaName: "tenant_prefdemo",
     role: "manager",
   };
 

@@ -55,8 +55,8 @@ quilometragem e status inicial; listar e detalhar — estendendo o módulo `vehi
   de faixa, `type` fora da união, `currentMileage` negativo, ou `status` operacional, quando
   `POST /veiculos`, então 400 (validação Zod / invariante de domínio).
 - [x] AC4: dada uma sessão no tenant A, quando `GET /veiculos`, então retorna só os veículos de A —
-  o veículo seedado em `tenant_demo2` não aparece.
-- [x] AC5: dada uma sessão no tenant A com header forjado `X-Tenant-Schema: tenant_demo2`, então o
+  o veículo seedado em `tenant_prefdemo2` não aparece.
+- [x] AC5: dada uma sessão no tenant A com header forjado `X-Tenant-Schema: tenant_prefdemo2`, então o
   header é ignorado e a lista continua sendo a de A.
 - [x] AC6: dada uma requisição a qualquer rota `/veiculos` sem token de sessão ou com token
   inválido/adulterado, então 401 e nenhum dado de tenant é acessado.
@@ -122,7 +122,7 @@ quilometragem e status inicial; listar e detalhar — estendendo o módulo `vehi
    `model text NOT NULL`, `year integer NOT NULL`, `type text NOT NULL`,
    `secretariat_id uuid NOT NULL REFERENCES secretariats(id)` (mantém `plate UNIQUE`, `status`,
    `current_mileage`). Em `src/seed-demo.ts`, criar a secretaria antes dos veículos e referenciar
-   `secretariat_id`, preenchendo `year`/`type` nos inserts de `tenant_demo` e `tenant_demo2`.
+   `secretariat_id`, preenchendo `year`/`type` nos inserts de `tenant_prefdemo` e `tenant_prefdemo2`.
 
 ## Riscos e decisões
 - Segurança: toca dado de tenant **e** é caminho de escrita → revisão `revisar-tenant` obrigatória
