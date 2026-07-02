@@ -1,0 +1,6 @@
+Imagens de terceiros usadas no app web.
+
+login-fleet.jpg
+  Fonte: Unsplash — https://unsplash.com/photos/1506521781263-d8422e82f27a
+  Licença: Unsplash License (uso livre, atribuição apreciada).
+  Nota: servida localmente por ora; migrar para CDN futuramente.

@@ -89,8 +89,10 @@ os veículos daquele tenant — matando o débito do `X-Tenant-Schema` por heade
 O fluxo web de login mudou de "lista de prefeituras para seleção" para o fluxo
 espelhando produção: a prefeitura é resolvida pelo **subdomínio** do Host
 (`<slug>.<domínio>` — F02, `apps/web/src/lib/tenant-host.ts`), e o login pede
-identidade + código 2FA (OTP fixo `000000` em dev, validado no servidor —
-`apps/web/src/lib/otp.ts`) até o Cognito entrar (ADR 0010). `GET
+**e-mail + senha** e depois **código 2FA**, espelhando o Cognito (ADR 0010).
+Em dev as credenciais e o código são fixos e validados no servidor
+(`apps/web/src/lib/dev-credentials.ts` — `gestor@demo.gov.br`/`frota123`;
+`apps/web/src/lib/otp.ts` — `000000`) até o Cognito entrar. `GET
 /sessao/prefeituras` segue existindo: o web o usa para casar o slug do host com
 as memberships da identidade; a autoridade continua sendo o token assinado.
 Em dev, `localhost` sem subdomínio cai em `DEV_TENANT_SLUG` (default `prefdemo`);

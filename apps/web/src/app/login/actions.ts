@@ -7,28 +7,38 @@ import {
   listPrefectures,
   startSession,
 } from "@/lib/auth-dev";
-import {
-  getAppBaseDomain,
-  getDevIdpSub,
-  getDevTenantSlug,
-} from "@/lib/config";
+import { getAppBaseDomain, getDevIdpSub, getDevTenantSlug } from "@/lib/config";
+import { isValidDevCredentials } from "@/lib/dev-credentials";
 import { isValidDevOtp } from "@/lib/otp";
 import { setSessionContext, setSessionToken } from "@/lib/session";
 import { tenantSlugFromHost } from "@/lib/tenant-host";
 
+export type LoginOk = { ok: true };
 export type LoginError = { ok: false; message: string };
 
 /**
- * Dev login espelhando produção: valida o OTP no servidor (nunca confia no
- * cliente), resolve a prefeitura pelo SUBDOMÍNIO do Host (F02) — o usuário não
- * escolhe tenant — e troca IdP token + tenant pela sessão assinada da API
- * (ADR 0010). O subdomínio apenas seleciona entre as memberships da própria
- * identidade; a autoridade é o token assinado.
+ * Etapa 1 (e-mail + senha) — validada NO SERVIDOR, nunca no cliente. Não emite
+ * sessão: apenas libera o desafio 2FA, espelhando o Cognito (senha -> MFA).
+ * Em dev as credenciais são fixas (@frotas dev-credentials) até o Cognito entrar.
  */
-export async function loginWithOtpAction(
-  sub: string,
-  otp: string,
-): Promise<LoginError> {
+export async function verifyCredentialsAction(
+  email: string,
+  password: string,
+): Promise<LoginOk | LoginError> {
+  if (!isValidDevCredentials(email, password)) {
+    return { ok: false, message: "E-mail ou senha inválidos." };
+  }
+  return { ok: true };
+}
+
+/**
+ * Etapa 2 (2FA) — valida o OTP no servidor, resolve a prefeitura pelo SUBDOMÍNIO
+ * (F02) e troca IdP token + tenant pela sessão assinada da API (ADR 0010). O
+ * subdomínio só seleciona entre as memberships da identidade; a autoridade é o
+ * token assinado. Em prod o Cognito garante que a senha já foi verificada antes
+ * do MFA; aqui a etapa 1 é o gate equivalente.
+ */
+export async function loginWithOtpAction(otp: string): Promise<LoginError> {
   if (!isValidDevOtp(otp)) {
     return { ok: false, message: "Código inválido. Verifique e tente de novo." };
   }
@@ -45,7 +55,7 @@ export async function loginWithOtpAction(
   }
 
   try {
-    const idpToken = await fetchDevIdpToken(sub || getDevIdpSub());
+    const idpToken = await fetchDevIdpToken(getDevIdpSub());
     const prefectures = await listPrefectures(idpToken);
     const prefecture = prefectures.find((p) => p.slug === slug);
     if (!prefecture) {

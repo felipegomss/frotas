@@ -1,51 +1,61 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { RiArrowLeftLine, RiErrorWarningLine } from "@remixicon/react";
-import { Alert, AlertDescription } from "@frotas/ui/components/alert";
-import { Badge } from "@frotas/ui/components/badge";
-import { Button } from "@frotas/ui/components/button";
 import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-} from "@frotas/ui/components/field";
+  RiArrowLeftLine,
+  RiErrorWarningLine,
+  RiEyeLine,
+  RiEyeOffLine,
+} from "@remixicon/react";
+import { Alert, AlertDescription } from "@frotas/ui/components/alert";
+import { Button } from "@frotas/ui/components/button";
+import { Field, FieldGroup, FieldLabel } from "@frotas/ui/components/field";
 import { Input } from "@frotas/ui/components/input";
 import {
   InputOTP,
   InputOTPGroup,
-  InputOTPSeparator,
   InputOTPSlot,
 } from "@frotas/ui/components/input-otp";
+import { DEV_PASSWORD } from "@/lib/dev-credentials";
 import { DEV_OTP_LENGTH } from "@/lib/otp";
-import { loginWithOtpAction } from "./actions";
+import { loginWithOtpAction, verifyCredentialsAction } from "./actions";
 
-type Step = "identify" | "otp";
+type Step = "credentials" | "otp";
+
+/** Mascara o local-part do e-mail para a tela de 2FA (ge•••@dominio). */
+function maskEmail(email: string): string {
+  const [local, domain] = email.split("@");
+  if (!local || !domain) return email;
+  const head = local.slice(0, 2);
+  return `${head}${"•".repeat(Math.max(3, local.length - 2))}@${domain}`;
+}
 
 /**
- * Fluxo de login em etapas, espelhando produção (ADR 0010): identidade ->
- * código de verificação (2FA). A prefeitura NÃO é escolhida aqui — vem do
- * subdomínio (F02). Em dev o código é fixo (000000) até o Cognito entrar.
+ * Fluxo de login (design "Frota Digital"): e-mail + senha -> código 2FA,
+ * espelhando o Cognito (ADR 0010). A prefeitura vem do subdomínio (F02). Em dev
+ * as credenciais e o código são fixos e validados no servidor.
  */
-export function LoginFlow({
-  defaultSub,
-  tenantSlug,
-}: {
-  defaultSub: string;
-  tenantSlug: string;
-}) {
-  const [step, setStep] = useState<Step>("identify");
-  const [sub, setSub] = useState(defaultSub);
+export function LoginFlow({ defaultEmail }: { defaultEmail: string }) {
+  const [step, setStep] = useState<Step>("credentials");
+  const [email, setEmail] = useState(defaultEmail);
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [otp, setOtp] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  function goToOtp(event: React.FormEvent) {
+  function submitCredentials(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
-    setOtp("");
-    setStep("otp");
+    startTransition(async () => {
+      const result = await verifyCredentialsAction(email, password);
+      if (!result.ok) {
+        setError(result.message);
+        return;
+      }
+      setOtp("");
+      setStep("otp");
+    });
   }
 
   function verifyCode(code: string) {
@@ -53,7 +63,7 @@ export function LoginFlow({
     startTransition(async () => {
       // On success the action starts the session and redirects; only an error
       // object ever comes back here.
-      const result = await loginWithOtpAction(sub, code);
+      const result = await loginWithOtpAction(code);
       if (result && !result.ok) {
         setError(result.message);
         setOtp("");
@@ -66,50 +76,34 @@ export function LoginFlow({
     if (otp.length === DEV_OTP_LENGTH) verifyCode(otp);
   }
 
-  return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="font-heading text-2xl font-semibold">
-          {step === "identify" ? "Entrar" : "Código de verificação"}
-        </h1>
-        <p className="text-sm text-balance text-muted-foreground">
-          {step === "identify" ? (
-            "Informe sua identidade para receber o código de verificação."
-          ) : (
-            <>
-              Digite o código de {DEV_OTP_LENGTH} dígitos enviado para{" "}
-              <span className="font-medium text-foreground">{sub}</span>.
-            </>
-          )}
-        </p>
-        <Badge variant="secondary" className="font-mono">
-          {tenantSlug}
-        </Badge>
-      </div>
+  if (step === "otp") {
+    return (
+      <div>
+        <button
+          type="button"
+          onClick={() => {
+            setStep("credentials");
+            setError(null);
+          }}
+          className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
+        >
+          <RiArrowLeftLine className="size-4" />
+          Voltar
+        </button>
 
-      {step === "identify" ? (
-        <form onSubmit={goToOtp}>
-          <FieldGroup>
-            <Field>
-              <FieldLabel htmlFor="sub">Identidade (sub)</FieldLabel>
-              <Input
-                id="sub"
-                name="sub"
-                value={sub}
-                onChange={(event) => setSub(event.target.value)}
-                required
-              />
-              <FieldDescription>
-                Login de desenvolvimento — em produção será seu e-mail
-                institucional.
-              </FieldDescription>
-            </Field>
-            <Field>
-              <Button type="submit">Enviar código</Button>
-            </Field>
-          </FieldGroup>
-        </form>
-      ) : (
+        <div className="mb-7">
+          <h1 className="font-[family-name:var(--font-brand)] text-[26px] font-bold leading-[1.15] text-foreground">
+            Verificação em duas etapas
+          </h1>
+          <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+            Digite o código de {DEV_OTP_LENGTH} dígitos enviado para{" "}
+            <span className="font-semibold text-foreground">
+              {maskEmail(email)}
+            </span>
+            .
+          </p>
+        </div>
+
         <form onSubmit={submitOtp}>
           <FieldGroup>
             <div className="flex justify-center">
@@ -122,13 +116,10 @@ export function LoginFlow({
                 disabled={pending}
                 aria-label="Código de verificação"
               >
-                <InputOTPGroup>
+                <InputOTPGroup className="*:data-[slot=input-otp-slot]:size-11 *:data-[slot=input-otp-slot]:text-base">
                   <InputOTPSlot index={0} />
                   <InputOTPSlot index={1} />
                   <InputOTPSlot index={2} />
-                </InputOTPGroup>
-                <InputOTPSeparator />
-                <InputOTPGroup>
                   <InputOTPSlot index={3} />
                   <InputOTPSlot index={4} />
                   <InputOTPSlot index={5} />
@@ -148,30 +139,123 @@ export function LoginFlow({
                 type="submit"
                 disabled={pending || otp.length < DEV_OTP_LENGTH}
               >
-                {pending ? "Entrando…" : "Entrar"}
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                className="text-muted-foreground"
-                disabled={pending}
-                onClick={() => {
-                  setStep("identify");
-                  setError(null);
-                }}
-              >
-                <RiArrowLeftLine />
-                Usar outra identidade
+                {pending ? "Entrando…" : "Verificar e entrar"}
               </Button>
             </Field>
 
-            <FieldDescription className="text-center">
+            <p className="text-center text-sm text-muted-foreground">
+              Não recebeu o código?{" "}
+              <button
+                type="button"
+                disabled={pending}
+                onClick={() => {
+                  // Reenvio real é do Cognito (prod); em dev o código é fixo.
+                  setOtp("");
+                  setError(null);
+                }}
+                className="font-semibold text-primary hover:underline disabled:opacity-50"
+              >
+                Reenviar
+              </button>
+            </p>
+
+            <p className="text-center text-xs text-muted-foreground">
               Ambiente de desenvolvimento: use{" "}
               <span className="font-mono font-medium">000000</span>.
-            </FieldDescription>
+            </p>
           </FieldGroup>
         </form>
-      )}
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="mb-7">
+        <h1 className="font-[family-name:var(--font-brand)] text-[26px] font-bold leading-[1.15] text-foreground">
+          Bem-vindo de volta
+        </h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
+          Entre para gerenciar a frota da sua prefeitura.
+        </p>
+      </div>
+
+      <form onSubmit={submitCredentials}>
+        <FieldGroup>
+          <Field>
+            <FieldLabel htmlFor="email">E-mail institucional</FieldLabel>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              placeholder="nome.sobrenome@prefeitura.gov.br"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              required
+            />
+          </Field>
+
+          <Field>
+            <div className="flex items-center justify-between">
+              <FieldLabel htmlFor="password">Senha</FieldLabel>
+              <button
+                type="button"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground"
+                onClick={() => {
+                  // Recuperação real é do Cognito (prod).
+                }}
+              >
+                Esqueci minha senha
+              </button>
+            </div>
+            <div className="relative">
+              <Input
+                id="password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
+                placeholder="Digite sua senha"
+                className="pr-10"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                required
+              />
+              <button
+                type="button"
+                aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                aria-pressed={showPassword}
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+              >
+                {showPassword ? (
+                  <RiEyeOffLine className="size-4" />
+                ) : (
+                  <RiEyeLine className="size-4" />
+                )}
+              </button>
+            </div>
+          </Field>
+
+          {error && (
+            <Alert variant="destructive">
+              <RiErrorWarningLine />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          <Field>
+            <Button type="submit" disabled={pending}>
+              {pending ? "Verificando…" : "Entrar"}
+            </Button>
+          </Field>
+
+          <p className="text-center text-xs text-muted-foreground">
+            Ambiente de desenvolvimento: senha{" "}
+            <span className="font-mono font-medium">{DEV_PASSWORD}</span>.
+          </p>
+        </FieldGroup>
+      </form>
     </div>
   );
 }
