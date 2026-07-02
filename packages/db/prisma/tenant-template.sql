@@ -1,7 +1,7 @@
 -- Template applied to each prefecture schema (MVP scope).
 CREATE TABLE secretariats (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  name text NOT NULL
+  name text NOT NULL UNIQUE
 );
 CREATE TABLE users (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

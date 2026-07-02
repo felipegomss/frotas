@@ -87,12 +87,18 @@ export async function seedDemoData(
          ('ABC1D23', 'Fiat Strada', 'available', 15000),
          ('EFG4H56', 'VW Saveiro', 'available', 42000)`,
     );
+    await tx.$executeRawUnsafe(
+      `INSERT INTO secretariats (name) VALUES ('Saúde')`,
+    );
   });
   await prisma.$transaction(async (tx) => {
     await tx.$executeRawUnsafe(`SET LOCAL search_path TO "tenant_demo2"`);
     await tx.$executeRawUnsafe(
       `INSERT INTO vehicles (plate, model, status, current_mileage) VALUES
          ('ZZZ9Z99', 'VW Gol', 'available', 9000)`,
+    );
+    await tx.$executeRawUnsafe(
+      `INSERT INTO secretariats (name) VALUES ('Educação')`,
     );
   });
 

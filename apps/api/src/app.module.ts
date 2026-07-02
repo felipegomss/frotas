@@ -6,9 +6,10 @@ import { AppService } from './app.service';
 import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
 import { VehicleModule } from './vehicle/vehicle.module';
+import { SecretariatModule } from './secretariat/secretariat.module';
 
 @Module({
-  imports: [HealthModule, AuthModule, VehicleModule],
+  imports: [HealthModule, AuthModule, VehicleModule, SecretariatModule],
   controllers: [AppController],
   providers: [
     AppService,
