@@ -77,29 +77,27 @@ export async function seedDemoData(
     },
   });
 
-  // Tenant schemas + distinct vehicles (proves isolation end to end).
+  // Tenant schemas + distinct secretariats/vehicles (proves isolation end to end).
+  // Secretariats first: vehicles.secretariat_id is a FK into this table.
   await provisionTenant(prisma, "demo");
   await provisionTenant(prisma, "demo2");
   await prisma.$transaction(async (tx) => {
     await tx.$executeRawUnsafe(`SET LOCAL search_path TO "tenant_demo"`);
-    await tx.$executeRawUnsafe(
-      `INSERT INTO vehicles (plate, model, status, current_mileage) VALUES
-         ('ABC1D23', 'Fiat Strada', 'available', 15000),
-         ('EFG4H56', 'VW Saveiro', 'available', 42000)`,
-    );
-    await tx.$executeRawUnsafe(
-      `INSERT INTO secretariats (name) VALUES ('Saúde')`,
-    );
+    const [secretariat] = await tx.$queryRaw<{ id: string }[]>`
+      INSERT INTO secretariats (name) VALUES ('Saúde') RETURNING id`;
+    await tx.$executeRaw`
+      INSERT INTO vehicles (plate, model, year, type, secretariat_id, status, current_mileage)
+      VALUES
+        ('ABC1D23', 'Fiat Strada', 2022, 'pickup', ${secretariat.id}::uuid, 'available', 15000),
+        ('EFG4H56', 'VW Saveiro', 2021, 'pickup', ${secretariat.id}::uuid, 'available', 42000)`;
   });
   await prisma.$transaction(async (tx) => {
     await tx.$executeRawUnsafe(`SET LOCAL search_path TO "tenant_demo2"`);
-    await tx.$executeRawUnsafe(
-      `INSERT INTO vehicles (plate, model, status, current_mileage) VALUES
-         ('ZZZ9Z99', 'VW Gol', 'available', 9000)`,
-    );
-    await tx.$executeRawUnsafe(
-      `INSERT INTO secretariats (name) VALUES ('Educação')`,
-    );
+    const [secretariat] = await tx.$queryRaw<{ id: string }[]>`
+      INSERT INTO secretariats (name) VALUES ('Educação') RETURNING id`;
+    await tx.$executeRaw`
+      INSERT INTO vehicles (plate, model, year, type, secretariat_id, status, current_mileage)
+      VALUES ('ZZZ9Z99', 'VW Gol', 2020, 'car', ${secretariat.id}::uuid, 'available', 9000)`;
   });
 
   return {

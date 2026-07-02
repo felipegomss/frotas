@@ -36,10 +36,17 @@ Objetivo: CRUD de secretarias (unidade organizacional) do tenant, base para vinc
 motoristas.
 Dependência: M0-F01. Módulo/EF: EF 01.
 
-### M0-F04 — Cadastro de veículos (completo) + tela web
-Objetivo: criar/editar veículo com placa, modelo, ano, tipo, secretaria, quilometragem e status
-inicial; listar e ver na web. Estende o módulo `vehicle` (hoje só list/save mínimos).
-Dependência: M0-F03. Módulo/EF: EF 01.
+### M0-F04 — Cadastro de veículos (completo): domínio + API
+Objetivo: CRUD completo de veículo (placa, modelo, ano, tipo, secretaria, quilometragem, status
+inicial) na API. Estende o módulo `vehicle` (hoje só list/save mínimos) e introduz a FK
+`vehicles.secretariat_id` (fecha o débito de bloquear exclusão de secretaria referenciada da F03).
+Dependência: M0-F03. Módulo/EF: EF 01. Spec: `F04-cadastro-veiculos.md`.
+
+### M0-F04b — Tela web de veículos + fundação web
+Objetivo: listar/criar/editar/ver veículo na web, consumindo a API da F04. Como é a PRIMEIRA
+superfície web, entrega junto a fundação: login/sessão no browser, API client com bearer,
+TanStack Query, shadcn/ui, layout e navegação. Destrava as telas web de F05 em diante.
+Dependência: M0-F04. Módulo/EF: EF 01 + roadmap fase 3 (auth-web) / fase 4.
 
 ### M0-F05 — Cadastro de motoristas + tela web
 Objetivo: cadastrar motorista (nome, CNH categoria/validade, secretaria, veículos autorizados) e

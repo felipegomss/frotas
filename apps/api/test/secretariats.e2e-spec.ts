@@ -218,4 +218,36 @@ describe('Secretariats (e2e)', () => {
       .send({ name: 'Primeira' })
       .expect(409);
   });
+
+  it('AC12 (M0-F04): deleting a secretariat with vehicles returns 409', async () => {
+    const secretariat = await request(app.getHttpServer())
+      .post('/secretarias')
+      .set('Authorization', auth())
+      .send({ name: `Em Uso ${Date.now()}` })
+      .expect(201);
+    const secretariatId = (secretariat.body as SecretariatBody).id;
+
+    await request(app.getHttpServer())
+      .post('/veiculos')
+      .set('Authorization', auth())
+      .send({
+        plate: 'USO1D23',
+        model: 'Fiat Strada',
+        year: 2022,
+        type: 'pickup',
+        secretariatId,
+        currentMileage: 1000,
+      })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .delete(`/secretarias/${secretariatId}`)
+      .set('Authorization', auth())
+      .expect(409);
+
+    await request(app.getHttpServer())
+      .get(`/secretarias/${secretariatId}`)
+      .set('Authorization', auth())
+      .expect(200);
+  });
 });

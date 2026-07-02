@@ -68,3 +68,59 @@ export type SecretariatResponse = z.infer<typeof SecretariatResponse>;
 
 export const SecretariatListResponse = z.array(SecretariatResponse);
 export type SecretariatListResponse = z.infer<typeof SecretariatListResponse>;
+
+// --- Vehicles (M0-F04) ------------------------------------------------------
+
+// Matches both the old plate format (AAA9999) and Mercosul (AAA9A99).
+const PLATE_REGEX = /^[A-Z]{3}[0-9][0-9A-Z][0-9]{2}$/;
+
+export const VehicleType = z.enum([
+  "car",
+  "motorcycle",
+  "truck",
+  "van",
+  "bus",
+  "pickup",
+  "machine",
+  "other",
+]);
+export type VehicleType = z.infer<typeof VehicleType>;
+
+// Status assignable by this CRUD. Operational statuses (in_use, reserved,
+// in_maintenance, in_repair) are set by other modules (M0-F06+), not here.
+export const VehicleAdministrativeStatus = z.enum(["available", "inactive"]);
+export type VehicleAdministrativeStatus = z.infer<
+  typeof VehicleAdministrativeStatus
+>;
+
+// Body of POST /veiculos and PUT /veiculos/:id (full replace).
+export const CreateVehicleRequest = z.object({
+  plate: z.string().trim().toUpperCase().regex(PLATE_REGEX, "Placa inválida"),
+  model: z.string().trim().min(1),
+  year: z.number().int().min(1900).max(2100),
+  type: VehicleType,
+  secretariatId: z.string().uuid(),
+  currentMileage: z.number().int().nonnegative(),
+  status: VehicleAdministrativeStatus.optional(),
+});
+export type CreateVehicleRequest = z.infer<typeof CreateVehicleRequest>;
+
+export const UpdateVehicleRequest = CreateVehicleRequest;
+export type UpdateVehicleRequest = z.infer<typeof UpdateVehicleRequest>;
+
+export const VehicleResponse = z.object({
+  id: z.string().uuid(),
+  plate: z.string(),
+  model: z.string(),
+  year: z.number().int(),
+  type: VehicleType,
+  secretariatId: z.string().uuid(),
+  status: z.string(),
+  currentMileage: z.number().int().nonnegative(),
+});
+export type VehicleResponse = z.infer<typeof VehicleResponse>;
+
+export const VehicleDetailListResponse = z.array(VehicleResponse);
+export type VehicleDetailListResponse = z.infer<
+  typeof VehicleDetailListResponse
+>;

@@ -13,3 +13,11 @@ export class DuplicateSecretariatNameError extends Error {
     this.name = "DuplicateSecretariatNameError";
   }
 }
+
+/** Raised when deleting a secretariat that still has vehicles referencing it (M0-F04). */
+export class SecretariatInUseError extends Error {
+  constructor(id: string) {
+    super(`Secretariat ${id} still has vehicles and cannot be deleted`);
+    this.name = "SecretariatInUseError";
+  }
+}
